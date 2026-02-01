@@ -36,6 +36,7 @@
             # Cloud CLIs
             pkgs.gh            # GitHub CLI
             pkgs.awscli2       # AWS CLI (for R2 S3-compatible API)
+            pkgs.flarectl      # Cloudflare API CLI (flarectl)
 
             # Useful CLI tools
             pkgs.jq
@@ -90,6 +91,7 @@
             echo "  npm run preview - Preview production build"
             echo ""
             echo "Deployment:"
+            echo "  ./scripts/setup-deployment.sh  - Full setup wizard"
             echo "  gh auth login   - Authenticate with GitHub"
             echo "  wrangler login  - Authenticate with Cloudflare"
             echo "  cd terraform && tofu init  - Initialize OpenTofu"
