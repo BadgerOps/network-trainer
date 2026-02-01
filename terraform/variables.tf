@@ -9,11 +9,6 @@ variable "cloudflare_account_id" {
   type        = string
 }
 
-variable "cloudflare_zone_id" {
-  description = "Cloudflare Zone ID for badgerops.foo"
-  type        = string
-}
-
 variable "project_name" {
   description = "Name of the Cloudflare Pages project"
   type        = string
@@ -26,8 +21,14 @@ variable "production_branch" {
   default     = "master"
 }
 
-variable "domain" {
-  description = "Custom domain for the Pages project"
+variable "zone_name" {
+  description = "Cloudflare zone (domain) name"
   type        = string
-  default     = "netrunner.badgerops.foo"
+  default     = "badgerops.foo"
+}
+
+variable "subdomain" {
+  description = "Subdomain for the Pages project"
+  type        = string
+  default     = "netrunner"
 }

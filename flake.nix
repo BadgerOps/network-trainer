@@ -36,7 +36,6 @@
             # Cloud CLIs
             pkgs.gh            # GitHub CLI
             pkgs.awscli2       # AWS CLI (for R2 S3-compatible API)
-            pkgs.flarectl      # Cloudflare API CLI (flarectl)
 
             # Useful CLI tools
             pkgs.jq

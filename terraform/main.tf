@@ -1,3 +1,8 @@
+# Look up the zone by name (no need to hardcode zone ID)
+data "cloudflare_zone" "main" {
+  name = var.zone_name
+}
+
 # Cloudflare Pages Project
 resource "cloudflare_pages_project" "network_trainer" {
   account_id        = var.cloudflare_account_id
@@ -44,13 +49,13 @@ resource "cloudflare_pages_project" "network_trainer" {
 resource "cloudflare_pages_domain" "network_trainer" {
   account_id   = var.cloudflare_account_id
   project_name = cloudflare_pages_project.network_trainer.name
-  domain       = var.domain
+  domain       = "${var.subdomain}.${var.zone_name}"
 }
 
 # DNS CNAME record pointing to Pages
 resource "cloudflare_record" "network_trainer" {
-  zone_id = var.cloudflare_zone_id
-  name    = "netrunner"
+  zone_id = data.cloudflare_zone.main.id
+  name    = var.subdomain
   content = "${cloudflare_pages_project.network_trainer.name}.pages.dev"
   type    = "CNAME"
   ttl     = 1 # Auto TTL

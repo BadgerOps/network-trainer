@@ -24,7 +24,7 @@ echo ""
 # ─────────────────────────────────────────────────────────────────────────────
 # Check required tools
 # ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[1/7]${NC} Checking required tools..."
+echo -e "${BLUE}[1/6]${NC} Checking required tools..."
 
 check_tool() {
     if ! command -v "$1" &> /dev/null; then
@@ -36,7 +36,6 @@ check_tool() {
 
 check_tool "gh"
 check_tool "wrangler"
-check_tool "flarectl"
 check_tool "jq"
 check_tool "tofu"
 echo ""
@@ -44,7 +43,7 @@ echo ""
 # ─────────────────────────────────────────────────────────────────────────────
 # Check GitHub authentication
 # ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[2/7]${NC} Checking GitHub authentication..."
+echo -e "${BLUE}[2/6]${NC} Checking GitHub authentication..."
 
 if ! gh auth status &> /dev/null; then
     echo -e "${YELLOW}⚠ Not logged into GitHub. Starting login...${NC}"
@@ -55,9 +54,9 @@ echo -e "  ${GREEN}✓${NC} Logged in as ${CYAN}$GH_USER${NC}"
 echo ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Check Cloudflare authentication
+# Check Cloudflare authentication & get Account ID
 # ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[3/7]${NC} Checking Cloudflare authentication..."
+echo -e "${BLUE}[3/6]${NC} Checking Cloudflare authentication..."
 
 if ! wrangler whoami &> /dev/null 2>&1; then
     echo -e "${YELLOW}⚠ Not logged into Cloudflare. Starting login...${NC}"
@@ -77,11 +76,11 @@ echo -e "  ${GREEN}✓${NC} Account ID: ${CYAN}$CF_ACCOUNT_ID${NC}"
 echo ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Get Cloudflare API Token (needed for zone lookup and deployment)
+# Get Cloudflare API Token
 # ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[4/8]${NC} Getting Cloudflare API Token..."
+echo -e "${BLUE}[4/6]${NC} Getting Cloudflare API Token..."
 echo ""
-echo -e "${CYAN}Cloudflare API Token${NC} (for Pages, DNS & Zone lookup)"
+echo -e "${CYAN}Cloudflare API Token${NC} (for Pages & DNS)"
 echo -e "   URL: ${CYAN}https://dash.cloudflare.com/profile/api-tokens${NC}"
 echo -e "   Click: Create Token → Custom Token"
 echo -e "   Permissions:"
@@ -94,29 +93,13 @@ read -rsp "   Paste your Cloudflare API Token: " CF_API_TOKEN
 echo ""
 echo -e "  ${GREEN}✓${NC} API Token received"
 echo ""
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Get Zone ID for domain using flarectl
-# ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[5/8]${NC} Getting Zone ID for ${CYAN}$DOMAIN${NC}..."
-
-# Use flarectl with the API token to get zone ID
-export CF_API_TOKEN
-CF_ZONE_ID=$(flarectl zone list --json 2>/dev/null | jq -r ".[] | select(.Name==\"$DOMAIN\") | .ID" || true)
-
-if [[ -z "$CF_ZONE_ID" || "$CF_ZONE_ID" == "null" ]]; then
-    echo -e "  ${YELLOW}⚠${NC} Could not auto-detect Zone ID via API"
-    echo -e "  Find it at: ${CYAN}https://dash.cloudflare.com${NC} → $DOMAIN → Overview → right sidebar"
-    read -rp "  Enter Zone ID for $DOMAIN: " CF_ZONE_ID
-else
-    echo -e "  ${GREEN}✓${NC} Auto-detected Zone ID: ${CYAN}$CF_ZONE_ID${NC}"
-fi
+echo -e "  ${CYAN}ℹ${NC}  Zone ID will be auto-detected by Terraform"
 echo ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Create/verify R2 bucket
+# Create/verify R2 bucket & get credentials
 # ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[6/8]${NC} Setting up R2 bucket for Terraform state..."
+echo -e "${BLUE}[5/6]${NC} Setting up R2 bucket for Terraform state..."
 
 if wrangler r2 bucket list 2>/dev/null | grep -q "$R2_BUCKET"; then
     echo -e "  ${GREEN}✓${NC} Bucket ${CYAN}$R2_BUCKET${NC} already exists"
@@ -127,11 +110,6 @@ else
 fi
 echo ""
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Get R2 API credentials
-# ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[7/8]${NC} Getting R2 API credentials..."
-echo ""
 echo -e "${CYAN}R2 API Token${NC} (for Terraform state storage)"
 echo -e "   URL: ${CYAN}https://dash.cloudflare.com/${CF_ACCOUNT_ID}/r2/api-tokens${NC}"
 echo -e "   Click: Create API Token"
@@ -148,7 +126,7 @@ echo ""
 # ─────────────────────────────────────────────────────────────────────────────
 # Set GitHub secrets
 # ─────────────────────────────────────────────────────────────────────────────
-echo -e "${BLUE}[8/8]${NC} Setting GitHub repository secrets..."
+echo -e "${BLUE}[6/6]${NC} Setting GitHub repository secrets..."
 
 # Check if repo exists
 REPO_EXISTS=$(gh repo view "$GH_USER/$PROJECT_NAME" --json name 2>/dev/null || echo "")
@@ -175,9 +153,6 @@ echo -e "  ${GREEN}✓${NC} CLOUDFLARE_API_TOKEN"
 echo "$CF_ACCOUNT_ID" | gh secret set CLOUDFLARE_ACCOUNT_ID --repo="$GH_USER/$PROJECT_NAME"
 echo -e "  ${GREEN}✓${NC} CLOUDFLARE_ACCOUNT_ID"
 
-echo "$CF_ZONE_ID" | gh secret set CLOUDFLARE_ZONE_ID --repo="$GH_USER/$PROJECT_NAME"
-echo -e "  ${GREEN}✓${NC} CLOUDFLARE_ZONE_ID"
-
 echo "$R2_ACCESS_KEY_ID" | gh secret set R2_ACCESS_KEY_ID --repo="$GH_USER/$PROJECT_NAME"
 echo -e "  ${GREEN}✓${NC} R2_ACCESS_KEY_ID"
 
@@ -188,6 +163,12 @@ echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}✓ Setup complete!${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo -e "GitHub Secrets configured:"
+echo -e "  • CLOUDFLARE_API_TOKEN"
+echo -e "  • CLOUDFLARE_ACCOUNT_ID"
+echo -e "  • R2_ACCESS_KEY_ID"
+echo -e "  • R2_SECRET_ACCESS_KEY"
 echo ""
 echo -e "Next steps:"
 echo -e "  1. Update ${CYAN}terraform/main.tf${NC} → set owner to ${CYAN}$GH_USER${NC}"
@@ -201,5 +182,7 @@ echo -e "  ${CYAN}cd terraform${NC}"
 echo -e "  ${CYAN}export AWS_ACCESS_KEY_ID='$R2_ACCESS_KEY_ID'${NC}"
 echo -e "  ${CYAN}export AWS_SECRET_ACCESS_KEY='<your-secret>'${NC}"
 echo -e "  ${CYAN}export AWS_ENDPOINT_URL_S3='https://$CF_ACCOUNT_ID.r2.cloudflarestorage.com'${NC}"
+echo -e "  ${CYAN}export TF_VAR_cloudflare_api_token='<your-token>'${NC}"
+echo -e "  ${CYAN}export TF_VAR_cloudflare_account_id='$CF_ACCOUNT_ID'${NC}"
 echo -e "  ${CYAN}tofu init && tofu plan${NC}"
 echo ""
