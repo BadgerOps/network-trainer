@@ -1,0 +1,111 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  TERRAFORM_VERSION: "1.7.0"
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # Build the application
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  # Deploy infrastructure with Terraform
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        working-directory: terraform
+    env:
+      TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_ENDPOINT_URL_S3: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+    outputs:
+      pages_url: ${{ steps.outputs.outputs.pages_url }}
+      custom_domain: ${{ steps.outputs.outputs.custom_domain }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Get Terraform Outputs
+        id: outputs
+        run: |
+          echo "pages_url=$(terraform output -raw pages_url)" >> $GITHUB_OUTPUT
+          echo "custom_domain=$(terraform output -raw custom_domain_url)" >> $GITHUB_OUTPUT
+
+  # Deploy to Cloudflare Pages using Wrangler
+  deploy-pages:
+    name: Deploy to Pages
+    runs-on: ubuntu-latest
+    needs: [build, terraform-apply]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=network-trainer --branch=main
+
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Complete! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Pages URL:** ${{ needs.terraform-apply.outputs.pages_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Custom Domain:** ${{ needs.terraform-apply.outputs.custom_domain }}" >> $GITHUB_STEP_SUMMARY

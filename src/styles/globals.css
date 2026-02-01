@@ -1,0 +1,384 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THEME CSS VARIABLES (defaults - overridden by themeStore.js)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Colors - set dynamically by theme */
+  --bg-primary: #0d0221;
+  --bg-secondary: #1a0a2e;
+  --bg-tertiary: #16213e;
+  --bg-surface: #1a1a2e;
+  --bg-hover: rgba(123, 97, 255, 0.1);
+  --bg-selected: rgba(255, 42, 109, 0.2);
+
+  --accent: #ff2a6d;
+  --accent-secondary: #05d9e8;
+  --accent-tertiary: #d300c5;
+  --accent-quaternary: #7b61ff;
+
+  --success: #39ff14;
+  --warning: #ffe66d;
+  --error: #ff2a6d;
+  --info: #05d9e8;
+
+  --text-primary: #ffffff;
+  --text-secondary: #ccccdd;
+  --text-muted: #6b6b8d;
+  --text-accent: #05d9e8;
+
+  --border: rgba(211, 0, 197, 0.4);
+  --border-light: rgba(123, 97, 255, 0.3);
+  --border-accent: #ff2a6d;
+
+  --router: #ff2a6d;
+  --switch: #05d9e8;
+  --l3switch: #7b61ff;
+  --computer: #39ff14;
+  --server: #ffe66d;
+  --cloud: #d300c5;
+
+  --glow: rgba(211, 0, 197, 0.3);
+  --shadow: rgba(0, 0, 0, 0.5);
+
+  /* Fonts - set dynamically by theme */
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+
+  /* Effects - set dynamically by theme */
+  --border-radius: 4px;
+  --glow-strength: 15px;
+  --animation-speed: 0.3s;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.font-heading { font-family: var(--font-heading); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+/* Legacy class aliases */
+.font-cyber { font-family: var(--font-heading); letter-spacing: 0.05em; }
+.font-tech { font-family: var(--font-body); }
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONDITIONAL EFFECTS (toggled by theme via class)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Grid Background - only when .has-grid is present on html */
+.has-grid .canvas-area,
+.has-grid .grid-bg {
+  background-image:
+    linear-gradient(var(--border-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Scanline CRT Effect - only when .has-scanlines is present */
+.has-scanlines::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.05) 0px,
+    rgba(0, 0, 0, 0.05) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  opacity: 0.4;
+}
+
+/* Glow Effects - only when .has-glow is present */
+.has-glow .device-node {
+  filter: drop-shadow(0 0 var(--glow-strength) var(--glow));
+}
+
+.has-glow .glow-text {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.has-glow .glow-box {
+  box-shadow: 0 0 var(--glow-strength) var(--glow);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR STYLING
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--border-radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--bg-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px var(--accent));
+  }
+  50% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 15px var(--accent));
+  }
+}
+
+@keyframes data-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes packet-move {
+  0% { offset-distance: 0%; }
+  100% { offset-distance: 100%; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+  50% {
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 10px var(--accent-secondary);
+  }
+}
+
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-fade-in { animation: fade-in var(--animation-speed) ease-out; }
+.animate-border-glow { animation: border-glow 3s ease-in-out infinite; }
+
+.animate-data-flow {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent) 25%,
+    var(--accent-secondary) 50%,
+    var(--accent) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: data-flow 3s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES - Themed colors
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.themed-bg-primary { background: var(--bg-primary); }
+.themed-bg-secondary { background: var(--bg-secondary); }
+.themed-bg-surface { background: var(--bg-surface); }
+.themed-bg-hover { background: var(--bg-hover); }
+
+.themed-text-primary { color: var(--text-primary); }
+.themed-text-secondary { color: var(--text-secondary); }
+.themed-text-muted { color: var(--text-muted); }
+.themed-text-accent { color: var(--text-accent); }
+
+.themed-border { border-color: var(--border); }
+.themed-border-light { border-color: var(--border-light); }
+.themed-border-accent { border-color: var(--border-accent); }
+
+.themed-success { color: var(--success); }
+.themed-warning { color: var(--warning); }
+.themed-error { color: var(--error); }
+.themed-info { color: var(--info); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Button styles */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all var(--animation-speed) ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-tertiary) 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 var(--glow-strength) var(--glow);
+}
+
+.btn-secondary {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-selected);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+/* Panel styles */
+.panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+}
+
+.panel-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-light);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+/* Input styles */
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  transition: all var(--animation-speed) ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--glow);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Card/Device styles */
+.device-card {
+  transition: all var(--animation-speed) ease;
+  border: 1px solid transparent;
+  background: var(--bg-surface);
+  border-radius: var(--border-radius);
+}
+
+.device-card:hover {
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 15px var(--glow);
+  transform: translateY(-2px);
+}
+
+.device-selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 20px var(--glow) !important;
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-secondary);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  border-radius: var(--border-radius);
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 0 15px var(--glow), 0 4px 20px var(--shadow);
+  max-width: 250px;
+}
+
+/* Packet type colors */
+.packet-ping { --packet-color: var(--success); }
+.packet-http { --packet-color: var(--info); }
+.packet-https { --packet-color: var(--accent-tertiary); }
+.packet-dns { --packet-color: var(--warning); }
+.packet-tcp { --packet-color: var(--accent); }
+.packet-udp { --packet-color: var(--accent-quaternary); }
+
+/* Selection styling */
+::selection {
+  background: var(--accent);
+  color: white;
+}
