@@ -5,7 +5,7 @@ output "pages_url" {
 
 output "custom_domain_url" {
   description = "Custom domain URL"
-  value       = "https://${var.domain}"
+  value       = "https://${var.subdomain}.${var.zone_name}"
 }
 
 output "project_name" {
@@ -16,4 +16,9 @@ output "project_name" {
 output "pages_subdomain" {
   description = "Pages subdomain for DNS configuration"
   value       = "${cloudflare_pages_project.network_trainer.name}.pages.dev"
+}
+
+output "zone_id" {
+  description = "Cloudflare Zone ID (auto-detected)"
+  value       = data.cloudflare_zone.main.id
 }
