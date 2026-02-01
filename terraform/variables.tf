@@ -23,7 +23,7 @@ variable "project_name" {
 variable "production_branch" {
   description = "Git branch for production deployments"
   type        = string
-  default     = "main"
+  default     = "master"
 }
 
 variable "domain" {
