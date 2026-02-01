@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide covers deploying NETRUNNER to Cloudflare Pages with Terraform and GitHub Actions CI/CD.
+This guide covers deploying NETRUNNER to Cloudflare Pages with OpenTofu (open-source Terraform) and GitHub Actions CI/CD.
 
 ## Architecture Overview
 
@@ -10,7 +10,7 @@ GitHub Repository
        ├── Push to main ──► GitHub Actions CI/CD
        │                          │
        │                          ├── Build (npm run build)
-       │                          ├── Terraform Apply
+       │                          ├── OpenTofu Apply
        │                          └── Wrangler Deploy
        │
        └──────────────────► Cloudflare Pages
@@ -37,7 +37,7 @@ nix develop
 
 # Or manually install tools:
 # - Node.js 20+
-# - Terraform 1.7+
+# - OpenTofu 1.8+ (https://opentofu.org)
 # - GitHub CLI
 # - Wrangler (Cloudflare CLI)
 # - AWS CLI (for R2)
@@ -85,7 +85,7 @@ curl -X GET "https://api.cloudflare.com/client/v4/zones?name=badgerops.foo" \
 4. Zone Resources: Include → Specific Zone → badgerops.foo
 5. Save the token securely
 
-### 4. Create R2 Bucket for Terraform State
+### 4. Create R2 Bucket for OpenTofu State
 
 ```bash
 # Create the bucket
@@ -118,7 +118,7 @@ gh secret set R2_SECRET_ACCESS_KEY
 
 Or via GitHub UI: Repository → Settings → Secrets and variables → Actions → New repository secret
 
-### 7. Update Terraform Configuration
+### 7. Update OpenTofu Configuration
 
 Edit `terraform/main.tf` and update the GitHub owner:
 
@@ -133,7 +133,7 @@ source {
 }
 ```
 
-### 8. Initialize and Apply Terraform (First Time)
+### 8. Initialize and Apply OpenTofu (First Time)
 
 ```bash
 cd terraform
@@ -143,14 +143,14 @@ export AWS_ACCESS_KEY_ID="your-r2-access-key"
 export AWS_SECRET_ACCESS_KEY="your-r2-secret-key"
 export AWS_ENDPOINT_URL_S3="https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com"
 
-# Initialize Terraform
-terraform init
+# Initialize OpenTofu
+tofu init
 
 # Review the plan
-terraform plan
+tofu plan
 
 # Apply (creates Pages project and DNS records)
-terraform apply
+tofu apply
 ```
 
 ### 9. Push and Deploy
@@ -163,7 +163,7 @@ git push origin main
 
 GitHub Actions will automatically:
 1. Build the application
-2. Run Terraform to ensure infrastructure is up-to-date
+2. Run OpenTofu to ensure infrastructure is up-to-date
 3. Deploy to Cloudflare Pages via Wrangler
 
 ## CI/CD Workflows
@@ -173,15 +173,15 @@ GitHub Actions will automatically:
 Runs on: Pull requests and pushes to main
 
 - **build**: Installs dependencies, builds the app, uploads artifact
-- **terraform-validate**: Checks Terraform formatting and validates configuration
-- **terraform-plan**: (PRs only) Shows what changes Terraform would make
+- **tofu-validate**: Checks OpenTofu formatting and validates configuration
+- **tofu-plan**: (PRs only) Shows what changes OpenTofu would make
 
 ### CD Pipeline (`.github/workflows/deploy.yml`)
 
 Runs on: Pushes to main, manual trigger
 
 - **build**: Builds the production bundle
-- **terraform-apply**: Applies infrastructure changes
+- **tofu-apply**: Applies infrastructure changes
 - **deploy-pages**: Deploys built assets to Cloudflare Pages
 
 ## Manual Deployment
@@ -196,9 +196,9 @@ npm run build
 wrangler pages deploy dist --project-name=network-trainer
 ```
 
-## Terraform Resources
+## OpenTofu Resources
 
-The Terraform configuration manages:
+The OpenTofu configuration manages:
 
 | Resource | Description |
 |----------|-------------|
@@ -215,16 +215,16 @@ The Terraform configuration manages:
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Pages and DNS permissions |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
 | `CLOUDFLARE_ZONE_ID` | Zone ID for badgerops.foo |
-| `R2_ACCESS_KEY_ID` | R2 API access key for Terraform state |
-| `R2_SECRET_ACCESS_KEY` | R2 API secret key for Terraform state |
+| `R2_ACCESS_KEY_ID` | R2 API access key for OpenTofu state |
+| `R2_SECRET_ACCESS_KEY` | R2 API secret key for OpenTofu state |
 
 ## Troubleshooting
 
-### Terraform State Lock
+### OpenTofu State Lock
 
-If Terraform complains about state lock:
+If OpenTofu complains about state lock:
 ```bash
-terraform force-unlock LOCK_ID
+tofu force-unlock LOCK_ID
 ```
 
 ### DNS Not Resolving
@@ -255,6 +255,17 @@ To rollback to a previous deployment:
 2. Click on Deployments
 3. Find the previous working deployment
 4. Click "Rollback to this deployment"
+
+## Why OpenTofu?
+
+This project uses [OpenTofu](https://opentofu.org) instead of Terraform because:
+
+- OpenTofu is fully open-source (MPL 2.0 license)
+- It's a drop-in replacement for Terraform (same syntax, providers, and state format)
+- HashiCorp changed Terraform to a non-open-source license (BSL 1.1) in 2023
+- OpenTofu is maintained by the Linux Foundation
+
+The `terraform` command is aliased to `tofu` in the Nix development shell for convenience.
 
 ## Security Notes
 

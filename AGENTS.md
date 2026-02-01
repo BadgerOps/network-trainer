@@ -199,20 +199,22 @@ export const useDeviceStore = create((set, get) => ({
 
 ## Infrastructure
 
-### Terraform
+### OpenTofu (Terraform-compatible)
 
-Infrastructure is managed with Terraform in `terraform/`:
+Infrastructure is managed with OpenTofu in `terraform/`:
 
 - `providers.tf` - Cloudflare provider and R2 backend
 - `main.tf` - Pages project, DNS records
 - `variables.tf` - Input variables
 - `outputs.tf` - Output values
 
+Note: We use OpenTofu (open-source Terraform fork) instead of Terraform due to licensing. The `terraform` command is aliased to `tofu` in the dev shell.
+
 ### CI/CD
 
 GitHub Actions in `.github/workflows/`:
 
-- `ci.yml` - Build validation, Terraform plan on PRs
+- `ci.yml` - Build validation, OpenTofu plan on PRs
 - `deploy.yml` - Production deployment on push to main
 
 ## Testing Approach
@@ -264,8 +266,8 @@ npm run preview      # Preview production build
 # Deployment
 gh auth login        # Authenticate GitHub CLI
 wrangler login       # Authenticate Cloudflare CLI
-terraform plan       # Preview infrastructure changes
-terraform apply      # Apply infrastructure changes
+tofu plan            # Preview infrastructure changes
+tofu apply           # Apply infrastructure changes
 ```
 
 ## Getting Help

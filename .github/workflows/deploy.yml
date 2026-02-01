@@ -7,7 +7,7 @@ on:
 
 env:
   NODE_VERSION: "20"
-  TERRAFORM_VERSION: "1.7.0"
+  OPENTOFU_VERSION: "1.8.0"
 
 concurrency:
   group: deploy-production
@@ -41,9 +41,9 @@ jobs:
           path: dist/
           retention-days: 1
 
-  # Deploy infrastructure with Terraform
-  terraform-apply:
-    name: Terraform Apply
+  # Deploy infrastructure with OpenTofu
+  tofu-apply:
+    name: OpenTofu Apply
     runs-on: ubuntu-latest
     needs: build
     defaults:
@@ -63,29 +63,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-          terraform_wrapper: false
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
 
-      - name: Terraform Init
-        run: terraform init
+      - name: OpenTofu Init
+        run: tofu init
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: OpenTofu Apply
+        run: tofu apply -auto-approve
 
-      - name: Get Terraform Outputs
+      - name: Get OpenTofu Outputs
         id: outputs
         run: |
-          echo "pages_url=$(terraform output -raw pages_url)" >> $GITHUB_OUTPUT
-          echo "custom_domain=$(terraform output -raw custom_domain_url)" >> $GITHUB_OUTPUT
+          echo "pages_url=$(tofu output -raw pages_url)" >> $GITHUB_OUTPUT
+          echo "custom_domain=$(tofu output -raw custom_domain_url)" >> $GITHUB_OUTPUT
 
   # Deploy to Cloudflare Pages using Wrangler
   deploy-pages:
     name: Deploy to Pages
     runs-on: ubuntu-latest
-    needs: [build, terraform-apply]
+    needs: [build, tofu-apply]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,5 +106,5 @@ jobs:
         run: |
           echo "## Deployment Complete! :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Pages URL:** ${{ needs.terraform-apply.outputs.pages_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Custom Domain:** ${{ needs.terraform-apply.outputs.custom_domain }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Pages URL:** ${{ needs.tofu-apply.outputs.pages_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Custom Domain:** ${{ needs.tofu-apply.outputs.custom_domain }}" >> $GITHUB_STEP_SUMMARY
