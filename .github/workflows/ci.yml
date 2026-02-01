@@ -92,28 +92,99 @@ jobs:
           tofu_version: ${{ env.OPENTOFU_VERSION }}
 
       - name: OpenTofu Init
+        id: init
         run: tofu init
 
       - name: OpenTofu Plan
-        run: tofu plan -no-color
+        id: plan
+        run: |
+          tofu plan -no-color -out=tfplan 2>&1 | tee plan_output.txt
+          echo "exitcode=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
+
+      - name: Generate Plan Summary
+        id: plan-summary
+        run: |
+          # Extract resource changes summary
+          if grep -q "No changes" plan_output.txt; then
+            echo "summary=✅ No changes. Infrastructure is up-to-date." >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            ADD=$(grep -oP '\d+(?= to add)' plan_output.txt || echo "0")
+            CHANGE=$(grep -oP '\d+(?= to change)' plan_output.txt || echo "0")
+            DESTROY=$(grep -oP '\d+(?= to destroy)' plan_output.txt || echo "0")
+            echo "summary=📊 **$ADD** to add, **$CHANGE** to change, **$DESTROY** to destroy" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Comment Plan on PR
         uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
         with:
           script: |
-            const output = `#### OpenTofu Plan
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('terraform/plan_output.txt', 'utf8');
+            const planExitCode = '${{ steps.plan.outputs.exitcode }}';
+            const summary = '${{ steps.plan-summary.outputs.summary }}';
+            const hasChanges = '${{ steps.plan-summary.outputs.has_changes }}' === 'true';
 
+            // Truncate if too long (GitHub comment limit is 65536 chars)
+            const maxLength = 60000;
+            let planText = planOutput;
+            let truncated = false;
+            if (planText.length > maxLength) {
+              planText = planText.substring(0, maxLength);
+              truncated = true;
+            }
+
+            const statusIcon = planExitCode === '0' ? '✅' : '❌';
+            const statusText = planExitCode === '0' ? 'Success' : 'Failed';
+
+            const output = `## ${statusIcon} OpenTofu Plan ${statusText}
+
+            ${summary}
+
+            <details>
+            <summary>📋 Click to expand full plan output</summary>
+
+            \`\`\`diff
+            ${planText}
             \`\`\`
-            Plan output available in workflow logs
-            \`\`\`
 
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            ${truncated ? '⚠️ *Plan output was truncated due to length*' : ''}
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            </details>
+
+            ---
+            *Pushed by: @${{ github.actor }} | Commit: \`${{ github.sha }}\`*`;
+
+            // Find existing bot comment to update instead of creating new ones
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: output
-            })
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('OpenTofu Plan')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              });
+            }
+
+      - name: Plan Status
+        if: steps.plan.outputs.exitcode != '0'
+        run: exit 1
