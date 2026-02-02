@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { useNetworkStore } from './networkStore'
 
 // Packet types with friendly descriptions
@@ -43,14 +44,16 @@ export const PACKET_TYPES = {
   }
 }
 
-export const useSimulationStore = create((set, get) => ({
-  // State
-  isRunning: false,
-  speed: 1, // 0.5, 1, 2 multiplier
-  packets: [], // Active packets in flight
-  activePacket: null, // Currently selected packet for inspection
-  logs: [], // Event log
-  trafficGeneration: null, // Current traffic pattern being generated
+export const useSimulationStore = create(
+  persist(
+    (set, get) => ({
+      // State
+      isRunning: false,
+      speed: 1, // 0.5, 1, 2 multiplier
+      packets: [], // Active packets in flight
+      activePacket: null, // Currently selected packet for inspection
+      logs: [], // Event log
+      trafficGeneration: null, // Current traffic pattern being generated
 
   // Control actions
   start: () => set({ isRunning: true }),
@@ -275,13 +278,22 @@ export const useSimulationStore = create((set, get) => ({
   },
 
   // Reset simulation
-  reset: () => {
-    set({
-      isRunning: false,
-      packets: [],
-      activePacket: null,
-      logs: [],
-      trafficGeneration: null
-    })
-  }
-}))
+      reset: () => {
+        set({
+          isRunning: false,
+          packets: [],
+          activePacket: null,
+          logs: [],
+          trafficGeneration: null
+        })
+      }
+    }),
+    {
+      name: 'netrunner-sim',
+      partialize: (state) => ({
+        isRunning: state.isRunning,
+        speed: state.speed
+      })
+    }
+  )
+)

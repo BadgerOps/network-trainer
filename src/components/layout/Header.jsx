@@ -16,6 +16,7 @@ import { useSimulationStore } from '../../store/simulationStore'
 import { useNetworkStore } from '../../store/networkStore'
 import { useLessonStore } from '../../store/lessonStore'
 import { useThemeStore } from '../../store/themeStore'
+import { useUiStore } from '../../store/uiStore'
 import LessonMenu from '../lessons/LessonMenu'
 import ThemeSelector from '../ThemeSelector'
 
@@ -32,6 +33,25 @@ export default function Header() {
     if (confirm('⚠️ PURGE ALL NODES? This action cannot be undone.')) {
       clearNetwork()
       reset()
+      useLessonStore.getState().resetProgress()
+      useUiStore.getState().resetUi()
+      useThemeStore.getState().setTheme('cyberpunk')
+      if (typeof window !== 'undefined') {
+        const keys = [
+          'netrunner-theme',
+          'netrunner-network',
+          'netrunner-lesson',
+          'netrunner-sim',
+          'netrunner-ui'
+        ]
+        keys.forEach((key) => {
+          try {
+            window.localStorage.removeItem(key)
+          } catch (error) {
+            // ignore storage errors
+          }
+        })
+      }
     }
   }
 

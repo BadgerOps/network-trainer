@@ -440,6 +440,7 @@ export function applyThemeToDOM(theme) {
   root.classList.toggle('has-grid', theme.effects.hasGrid)
   root.classList.toggle('has-scanlines', theme.effects.hasScanlines)
   root.classList.toggle('has-glow', theme.effects.hasGlow)
+  root.classList.toggle('theme-cyberpunk', theme.id === 'cyberpunk')
 }
 
 // Helper to convert camelCase to kebab-case

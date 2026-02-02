@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 // Device types with friendly names and default configs
 export const DEVICE_TYPES = {
@@ -132,24 +133,35 @@ const generateMacAddress = () => {
 }
 
 // Main network store
-export const useNetworkStore = create((set, get) => ({
-  // State
-  devices: [],
-  connections: [],
-  selectedDevice: null,
-  selectedConnection: null,
-  connectionMode: null, // null, 'selecting-source', 'selecting-target'
-  pendingConnection: null, // { sourceDevice, sourcePort }
+const updateDeviceCounter = (devices) => {
+  const max = devices.reduce((acc, device) => {
+    const parts = device.id.split('-')
+    const num = Number(parts[parts.length - 1])
+    return Number.isFinite(num) ? Math.max(acc, num) : acc
+  }, 0)
+  deviceCounter = max
+}
 
-  // Device actions
-  addDevice: (type, x, y) => {
-    const device = createDevice(type, x, y)
-    if (!device) return null
-    set((state) => ({
-      devices: [...state.devices, device]
-    }))
-    return device
-  },
+export const useNetworkStore = create(
+  persist(
+    (set, get) => ({
+      // State
+      devices: [],
+      connections: [],
+      selectedDevice: null,
+      selectedConnection: null,
+      connectionMode: null, // null, 'selecting-source', 'selecting-target'
+      pendingConnection: null, // { sourceDevice, sourcePort }
+
+      // Device actions
+      addDevice: (type, x, y) => {
+        const device = createDevice(type, x, y)
+        if (!device) return null
+        set((state) => ({
+          devices: [...state.devices, device]
+        }))
+        return device
+      },
 
   removeDevice: (deviceId) => {
     set((state) => ({
@@ -444,28 +456,28 @@ export const useNetworkStore = create((set, get) => ({
   },
 
   // Clear all
-  clearNetwork: () => {
-    deviceCounter = 0
-    set({
-      devices: [],
-      connections: [],
-      selectedDevice: null,
-      selectedConnection: null,
-      connectionMode: null,
-      pendingConnection: null
-    })
-  },
+      clearNetwork: () => {
+        deviceCounter = 0
+        set({
+          devices: [],
+          connections: [],
+          selectedDevice: null,
+          selectedConnection: null,
+          connectionMode: null,
+          pendingConnection: null
+        })
+      },
 
   // Load demo network
-  loadDemoNetwork: () => {
-    deviceCounter = 0
-    const router = createDevice('router', 400, 150)
-    const switch1 = createDevice('switch', 200, 300)
-    const switch2 = createDevice('switch', 600, 300)
-    const pc1 = createDevice('computer', 100, 450)
-    const pc2 = createDevice('computer', 300, 450)
-    const server = createDevice('server', 600, 450)
-    const cloud = createDevice('cloud', 400, 50)
+      loadDemoNetwork: () => {
+        deviceCounter = 0
+        const router = createDevice('router', 400, 150)
+        const switch1 = createDevice('switch', 200, 300)
+        const switch2 = createDevice('switch', 600, 300)
+        const pc1 = createDevice('computer', 100, 450)
+        const pc2 = createDevice('computer', 300, 450)
+        const server = createDevice('server', 600, 450)
+        const cloud = createDevice('cloud', 400, 50)
 
     // Set some IPs
     router.interfaces[0].ip = '192.168.1.1'
@@ -487,9 +499,9 @@ export const useNetworkStore = create((set, get) => ({
     server.interfaces[0].subnet = '255.255.255.0'
     server.interfaces[0].gateway = '192.168.2.1'
 
-    set({
-      devices: [router, switch1, switch2, pc1, pc2, server, cloud],
-      connections: [
+        set({
+          devices: [router, switch1, switch2, pc1, pc2, server, cloud],
+          connections: [
         {
           id: 'conn-1',
           source: { deviceId: router.id, portId: router.interfaces[0].id },
@@ -532,9 +544,21 @@ export const useNetworkStore = create((set, get) => ({
           status: 'up',
           speed: '1Gbps'
         }
-      ],
-      selectedDevice: null,
-      selectedConnection: null
-    })
-  }
-}))
+          ],
+          selectedDevice: null,
+          selectedConnection: null
+        })
+      }
+    }),
+    {
+      name: 'netrunner-network',
+      partialize: (state) => ({
+        devices: state.devices,
+        connections: state.connections
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.devices) updateDeviceCounter(state.devices)
+      }
+    }
+  )
+)

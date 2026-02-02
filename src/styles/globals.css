@@ -80,6 +80,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.app-shell {
+  background: linear-gradient(
+    180deg,
+    var(--bg-primary) 0%,
+    var(--bg-secondary) 50%,
+    var(--bg-tertiary) 100%
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    TYPOGRAPHY UTILITY CLASSES
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -203,6 +212,12 @@ h1, h2, h3 {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes cyberpunk-shift {
+  0% { background-position: 0% 50%, 50% 50%; }
+  50% { background-position: 100% 50%, 50% 50%; }
+  100% { background-position: 0% 50%, 50% 50%; }
+}
+
 @keyframes lesson-panel-in {
   from { opacity: 0; transform: translateX(16px); }
   to { opacity: 1; transform: translateX(0); }
@@ -229,6 +244,29 @@ h1, h2, h3 {
 .animate-border-glow { animation: border-glow 3s ease-in-out infinite; }
 .animate-lesson-panel { animation: lesson-panel-in 0.4s ease-out; }
 .animate-lesson-card { animation: lesson-card-rise 0.35s ease-out; }
+
+/* Animated cyberpunk gradient */
+.theme-cyberpunk .app-shell {
+  background-image:
+    linear-gradient(
+      120deg,
+      rgba(255, 42, 109, 0.22) 0%,
+      rgba(5, 217, 232, 0.18) 35%,
+      rgba(123, 97, 255, 0.18) 65%,
+      rgba(211, 0, 197, 0.22) 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--bg-primary) 0%,
+      var(--bg-secondary) 50%,
+      var(--bg-tertiary) 100%
+    );
+  background-size: 240% 240%, 100% 100%;
+}
+
+.theme-cyberpunk .app-shell.is-online {
+  animation: cyberpunk-shift 28s ease-in-out infinite;
+}
 
 .animate-data-flow {
   background: linear-gradient(90deg,

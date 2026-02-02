@@ -10,14 +10,17 @@ import { useNetworkStore } from './store/networkStore'
 import { useSimulationStore } from './store/simulationStore'
 import { useLessonStore } from './store/lessonStore'
 import { useThemeStore } from './store/themeStore'
+import { useUiStore } from './store/uiStore'
 
 export default function App() {
   const selectedDevice = useNetworkStore((state) => state.selectedDevice)
   const activePacket = useSimulationStore((state) => state.activePacket)
+  const isRunning = useSimulationStore((state) => state.isRunning)
   const currentLesson = useLessonStore((state) => state.currentLesson)
   const mode = useLessonStore((state) => state.mode)
   const theme = useThemeStore((state) => state.getTheme())
-  const [dockWidth, setDockWidth] = React.useState(360)
+  const dockWidth = useUiStore((state) => state.dockWidth)
+  const setDockWidth = useUiStore((state) => state.setDockWidth)
   const isResizingRef = React.useRef(false)
 
   React.useEffect(() => {
@@ -44,10 +47,9 @@ export default function App() {
 
   return (
     <div
-      className="h-screen w-screen flex flex-col relative overflow-hidden"
-      style={{
-        background: `linear-gradient(180deg, ${theme.colors.bgPrimary} 0%, ${theme.colors.bgSecondary} 50%, ${theme.colors.bgTertiary} 100%)`
-      }}
+      className={`app-shell h-screen w-screen flex flex-col relative overflow-hidden ${
+        isRunning ? 'is-online' : ''
+      }`}
     >
       {/* Grid Background - only shows if theme has grid effect */}
       {theme.effects.hasGrid && (

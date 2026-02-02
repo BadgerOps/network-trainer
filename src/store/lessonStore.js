@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 // Lesson definitions organized by module
 export const LESSONS = {
@@ -1135,116 +1136,157 @@ export const CHALLENGES = {
   }
 }
 
-export const useLessonStore = create((set, get) => ({
-  // State
-  mode: 'sandbox', // sandbox, lesson, challenge
-  currentLesson: null,
-  currentStep: 0,
-  completedLessons: [],
-  currentChallenge: null,
-  completedObjectives: [],
-  completedChallenges: [],
+export const useLessonStore = create(
+  persist(
+    (set, get) => ({
+      // State
+      mode: 'sandbox', // sandbox, lesson, challenge
+      currentLesson: null,
+      currentLessonId: null,
+      currentStep: 0,
+      completedLessons: [],
+      currentChallenge: null,
+      currentChallengeId: null,
+      completedObjectives: [],
+      completedChallenges: [],
 
   // Mode actions
-  setMode: (mode) => set({ mode }),
+      setMode: (mode) => set({ mode }),
 
   // Lesson actions
-  startLesson: (lessonId) => {
-    const lesson = LESSONS[lessonId]
-    if (!lesson) return
-    set({
-      mode: 'lesson',
-      currentLesson: lesson,
-      currentStep: 0
-    })
-  },
+      startLesson: (lessonId) => {
+        const lesson = LESSONS[lessonId]
+        if (!lesson) return
+        set({
+          mode: 'lesson',
+          currentLesson: lesson,
+          currentLessonId: lessonId,
+          currentStep: 0
+        })
+      },
 
-  nextStep: () => {
-    set((state) => {
-      if (!state.currentLesson) return state
-      const maxStep = state.currentLesson.steps.length - 1
-      if (state.currentStep >= maxStep) {
-        // Lesson complete!
-        return {
-          completedLessons: state.completedLessons.includes(state.currentLesson.id)
-            ? state.completedLessons
-            : [...state.completedLessons, state.currentLesson.id],
-          currentStep: maxStep
-        }
-      }
-      return { currentStep: state.currentStep + 1 }
-    })
-  },
+      nextStep: () => {
+        set((state) => {
+          if (!state.currentLesson) return state
+          const maxStep = state.currentLesson.steps.length - 1
+          if (state.currentStep >= maxStep) {
+            // Lesson complete!
+            return {
+              completedLessons: state.completedLessons.includes(state.currentLesson.id)
+                ? state.completedLessons
+                : [...state.completedLessons, state.currentLesson.id],
+              currentStep: maxStep
+            }
+          }
+          return { currentStep: state.currentStep + 1 }
+        })
+      },
 
-  prevStep: () => {
-    set((state) => ({
-      currentStep: Math.max(0, state.currentStep - 1)
-    }))
-  },
+      prevStep: () => {
+        set((state) => ({
+          currentStep: Math.max(0, state.currentStep - 1)
+        }))
+      },
 
-  endLesson: () => {
-    set({
-      mode: 'sandbox',
-      currentLesson: null,
-      currentStep: 0
-    })
-  },
+      endLesson: () => {
+        set({
+          mode: 'sandbox',
+          currentLesson: null,
+          currentLessonId: null,
+          currentStep: 0
+        })
+      },
 
   // Challenge actions
-  startChallenge: (challengeId) => {
-    const challenge = CHALLENGES[challengeId]
-    if (!challenge) return
-    set({
-      mode: 'challenge',
-      currentChallenge: challenge,
-      completedObjectives: []
-    })
-  },
+      startChallenge: (challengeId) => {
+        const challenge = CHALLENGES[challengeId]
+        if (!challenge) return
+        set({
+          mode: 'challenge',
+          currentChallenge: challenge,
+          currentChallengeId: challengeId,
+          completedObjectives: []
+        })
+      },
 
-  checkObjectives: (networkState, simState) => {
-    set((state) => {
-      if (!state.currentChallenge) return state
+      checkObjectives: (networkState, simState) => {
+        set((state) => {
+          if (!state.currentChallenge) return state
 
-      const completed = state.currentChallenge.objectives
-        .filter(obj => obj.check(networkState, simState))
-        .map(obj => obj.id)
+          const completed = state.currentChallenge.objectives
+            .filter(obj => obj.check(networkState, simState))
+            .map(obj => obj.id)
 
-      // Check if all objectives complete
-      if (completed.length === state.currentChallenge.objectives.length) {
-        return {
-          completedObjectives: completed,
-          completedChallenges: state.completedChallenges.includes(state.currentChallenge.id)
-            ? state.completedChallenges
-            : [...state.completedChallenges, state.currentChallenge.id]
-        }
-      }
+          // Check if all objectives complete
+          if (completed.length === state.currentChallenge.objectives.length) {
+            return {
+              completedObjectives: completed,
+              completedChallenges: state.completedChallenges.includes(state.currentChallenge.id)
+                ? state.completedChallenges
+                : [...state.completedChallenges, state.currentChallenge.id]
+            }
+          }
 
-      return { completedObjectives: completed }
-    })
-  },
+          return { completedObjectives: completed }
+        })
+      },
 
-  endChallenge: () => {
-    set({
-      mode: 'sandbox',
-      currentChallenge: null,
-      completedObjectives: []
-    })
-  },
+      endChallenge: () => {
+        set({
+          mode: 'sandbox',
+          currentChallenge: null,
+          currentChallengeId: null,
+          completedObjectives: []
+        })
+      },
 
   // Progress
-  getLessonProgress: () => {
-    const state = get()
-    return {
-      completed: state.completedLessons.length,
-      total: Object.keys(LESSONS).length
-    }
-  },
+      getLessonProgress: () => {
+        const state = get()
+        return {
+          completed: state.completedLessons.length,
+          total: Object.keys(LESSONS).length
+        }
+      },
 
-  getChallengeProgress: () => {
-    const state = get()
-    return {
-      completed: state.completedChallenges.length,
-      total: Object.keys(CHALLENGES).length
+      getChallengeProgress: () => {
+        const state = get()
+        return {
+          completed: state.completedChallenges.length,
+          total: Object.keys(CHALLENGES).length
+        }
+      },
+
+      resetProgress: () => {
+        set({
+          mode: 'sandbox',
+          currentLesson: null,
+          currentLessonId: null,
+          currentStep: 0,
+          completedLessons: [],
+          currentChallenge: null,
+          currentChallengeId: null,
+          completedObjectives: [],
+          completedChallenges: []
+        })
+      }
+    }),
+    {
+      name: 'netrunner-lesson',
+      partialize: (state) => ({
+        mode: state.mode,
+        currentLessonId: state.currentLessonId,
+        currentStep: state.currentStep,
+        completedLessons: state.completedLessons,
+        currentChallengeId: state.currentChallengeId,
+        completedObjectives: state.completedObjectives,
+        completedChallenges: state.completedChallenges
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+        state.currentLesson = state.currentLessonId ? LESSONS[state.currentLessonId] : null
+        state.currentChallenge = state.currentChallengeId ? CHALLENGES[state.currentChallengeId] : null
+      }
     }
-  }
-}))
+  )
+)
