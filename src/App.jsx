@@ -17,6 +17,30 @@ export default function App() {
   const currentLesson = useLessonStore((state) => state.currentLesson)
   const mode = useLessonStore((state) => state.mode)
   const theme = useThemeStore((state) => state.getTheme())
+  const [dockWidth, setDockWidth] = React.useState(360)
+  const isResizingRef = React.useRef(false)
+
+  React.useEffect(() => {
+    const handleMove = (event) => {
+      if (!isResizingRef.current) return
+      const nextWidth = Math.max(320, Math.min(520, window.innerWidth - event.clientX))
+      setDockWidth(nextWidth)
+    }
+
+    const handleUp = () => {
+      if (!isResizingRef.current) return
+      isResizingRef.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('mouseup', handleUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseup', handleUp)
+    }
+  }, [])
 
   return (
     <div
@@ -69,12 +93,25 @@ export default function App() {
 
         {/* Right Panel - Context-sensitive */}
         <aside
-          className="w-80 backdrop-blur-md flex flex-col"
+          className="backdrop-blur-md flex flex-col relative"
           style={{
+            width: dockWidth,
             background: `linear-gradient(180deg, ${theme.colors.bgPrimary}e6 0%, ${theme.colors.bgSecondary}e6 100%)`,
             borderLeft: `1px solid ${theme.colors.border}`
           }}
         >
+          <div
+            className="absolute left-0 top-0 h-full w-2 cursor-col-resize z-30 pointer-events-auto"
+            style={{
+              background: `linear-gradient(180deg, transparent 0%, ${theme.colors.borderLight}80 40%, ${theme.colors.borderLight}80 60%, transparent 100%)`
+            }}
+            onMouseDown={(event) => {
+              event.preventDefault()
+              isResizingRef.current = true
+              document.body.style.cursor = 'col-resize'
+              document.body.style.userSelect = 'none'
+            }}
+          />
           {/* Show lesson panel if in lesson mode */}
           {mode === 'lesson' && currentLesson && (
             <LessonViewer />

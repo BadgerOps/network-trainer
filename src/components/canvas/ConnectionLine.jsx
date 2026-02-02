@@ -13,8 +13,22 @@ export default function ConnectionLine({ connection, points, isActive }) {
   const midX = (x1 + x2) / 2
   const midY = (y1 + y2) / 2
 
-  // Calculate line angle for proper orientation
-  const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI)
+  const controlOffset = Math.max(40, Math.abs(x2 - x1) * 0.5)
+  const cx1 = x1 + controlOffset
+  const cy1 = y1
+  const cx2 = x2 - controlOffset
+  const cy2 = y2
+
+  const angle = Math.atan2(y2 - cy2, x2 - cx2)
+  const arrowSize = 8
+  const arrowPoint1 = {
+    x: x2 - Math.cos(angle - Math.PI / 6) * arrowSize,
+    y: y2 - Math.sin(angle - Math.PI / 6) * arrowSize
+  }
+  const arrowPoint2 = {
+    x: x2 - Math.cos(angle + Math.PI / 6) * arrowSize,
+    y: y2 - Math.sin(angle + Math.PI / 6) * arrowSize
+  }
 
   const getStatusColor = () => {
     switch (connection.status) {
@@ -43,10 +57,11 @@ export default function ConnectionLine({ connection, points, isActive }) {
     <Group>
       {/* Main connection line */}
       <Line
-        points={[x1, y1, x2, y2]}
+        points={[x1, y1, cx1, cy1, cx2, cy2, x2, y2]}
         stroke={isHovered ? '#6366f1' : getStatusColor()}
         strokeWidth={isHovered ? 4 : 3}
         lineCap="round"
+        bezier
         shadowColor={getStatusColor()}
         shadowBlur={isActive ? 8 : 0}
         onClick={handleClick}
@@ -54,6 +69,20 @@ export default function ConnectionLine({ connection, points, isActive }) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         hitStrokeWidth={15}
+      />
+
+      {/* Endpoint handles */}
+      <Circle x={x1} y={y1} radius={4} fill={getStatusColor()} opacity={0.9} />
+      <Circle x={x2} y={y2} radius={4} fill={getStatusColor()} opacity={0.9} />
+
+      {/* Direction arrow */}
+      <Line
+        points={[x2, y2, arrowPoint1.x, arrowPoint1.y, arrowPoint2.x, arrowPoint2.y]}
+        closed
+        fill={getStatusColor()}
+        stroke={getStatusColor()}
+        strokeWidth={1}
+        opacity={0.9}
       />
 
       {/* Animated data flow indicator (when active) */}
