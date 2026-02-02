@@ -906,6 +906,897 @@ Congratulations - you've completed the Protocols module!`,
         action: null
       }
     ]
+  },
+
+  // ============================================
+  // PRODUCTION TECH TRAINER: MODULE 6 - AUDIO FUNDAMENTALS
+  // ============================================
+  'audio-mixing-fundamentals': {
+    id: 'audio-mixing-fundamentals',
+    module: 6,
+    title: 'Audio Mixing Fundamentals',
+    icon: '🎚️',
+    difficulty: 'beginner',
+    duration: '15 min',
+    description: 'Learn the basics of audio signal flow, gain staging, and channel strip controls',
+    steps: [
+      {
+        id: 1,
+        title: 'What is an Audio Signal?',
+        content: `Audio signals are electrical representations of sound waves.
+
+**Key concepts:**
+• Analog signals are continuous electrical voltages
+• Digital signals are discrete numerical samples
+• Signal level is measured in decibels (dB)
+• Professional audio uses balanced connections to reject noise
+
+Think of audio like water flowing through pipes - the signal flows from source to destination, and we can control its "pressure" (level) along the way.`,
+        action: null
+      },
+      {
+        id: 2,
+        title: 'Understanding Signal Flow',
+        content: `Every audio system follows a basic signal chain:
+
+**Source → Preamp → Processing → Output**
+
+In a live sound context:
+• **Source**: Microphone or instrument
+• **Preamp**: Boosts weak mic signals
+• **Processing**: EQ, compression, effects
+• **Output**: Amplifier and speakers
+
+Each stage must be properly calibrated to avoid distortion or noise.`,
+        action: null
+      },
+      {
+        id: 3,
+        title: 'The Art of Gain Staging',
+        content: `Gain staging is setting proper signal levels at each stage.
+
+**The goal:** Maximize signal-to-noise ratio without clipping
+
+**Visual indicators:**
+• 🟢 Green: Healthy signal (-18 to -12 dB)
+• 🟡 Yellow: Hot signal (-12 to -6 dB)
+• 🔴 Red: Clipping! (0 dB and above)
+
+**Golden rule:** Set each stage so peaks hit around -12 dB. This leaves "headroom" for unexpected loud moments.`,
+        action: null
+      },
+      {
+        id: 4,
+        title: 'Anatomy of a Channel Strip',
+        content: `A channel strip processes audio from input to output:
+
+**From top to bottom:**
+• **Gain/Trim**: First stage amplification
+• **High-Pass Filter (HPF)**: Removes low rumble
+• **EQ Section**: Shape the tone
+• **Dynamics**: Compressor/gate
+• **Aux Sends**: Monitor mixes, effects
+• **Pan**: Left/right positioning
+• **Fader**: Final level control
+• **Mute/Solo**: Monitoring controls
+
+Each control affects the signal before passing it downstream.`,
+        action: null
+      },
+      {
+        id: 5,
+        title: 'Equalization: Shaping Your Sound',
+        content: `EQ adjusts the volume of specific frequencies.
+
+**Pro tip:** Cut before you boost!
+
+**Common EQ moves:**
+• **HPF at 80-100Hz**: Removes rumble from vocals
+• **Cut 250-400Hz**: Reduces "muddiness"
+• **Boost 2-4kHz**: Adds presence/clarity
+• **Cut 3-5kHz**: Tames harshness
+
+**Frequency ranges:**
+• 60-250 Hz: Bass, warmth, boom
+• 250-2000 Hz: Body, mud, honk
+• 2000-6000 Hz: Presence, clarity, harshness
+• 6000-20000 Hz: Brilliance, air, sizzle`,
+        action: null
+      },
+      {
+        id: 6,
+        title: 'Dynamics Processing',
+        content: `Dynamics processors control the volume range of audio.
+
+**Compressor** - Reduces loud peaks:
+• Threshold: Level where compression starts
+• Ratio: How much to reduce (4:1 = 4dB in → 1dB out)
+• Attack: How fast it clamps down
+• Release: How fast it lets go
+
+**Noise Gate** - Silences quiet signals:
+• Useful for removing bleed between songs
+• Set threshold just above the noise floor
+
+**When to use:** Vocals for consistent levels, drums for punch, bass for evenness.`,
+        action: null
+      },
+      {
+        id: 7,
+        title: 'Lesson Complete! 🎚️',
+        content: `Excellent work! You've learned the fundamentals of audio mixing.
+
+**Key takeaways:**
+• Audio flows from source → preamp → processing → output
+• Proper gain staging prevents noise and distortion
+• EQ shapes tone - cut before you boost
+• Compression controls dynamics
+• Each channel strip stage affects everything downstream
+
+**Pro tip:** Trust your ears, but verify with meters. A good mix sounds right AND measures right.
+
+Next up: Learn about wireless systems and frequency coordination!`,
+        action: null
+      }
+    ]
+  },
+
+  // ============================================
+  // PRODUCTION TECH TRAINER: MODULE 7 - WIRELESS SYSTEMS
+  // ============================================
+  'uhf-frequency-coordination': {
+    id: 'uhf-frequency-coordination',
+    module: 7,
+    title: 'UHF Frequency Coordination',
+    icon: '📡',
+    difficulty: 'intermediate',
+    duration: '20 min',
+    description: 'Learn to coordinate wireless frequencies, avoid interference, and calculate safe frequency spacing',
+    steps: [
+      {
+        id: 1,
+        title: 'The Radio Frequency Landscape',
+        content: `Wireless audio devices operate in the UHF (Ultra High Frequency) spectrum.
+
+**Key frequency bands for wireless audio:**
+• **470-608 MHz**: Primary band (post-repack)
+• **614-698 MHz**: Formerly TV channels 38-51 (no longer legal!)
+• **902-928 MHz**: ISM band (shared with WiFi, etc.)
+• **1.9 GHz / 2.4 GHz**: DECT and WiFi bands
+
+**Why UHF?**
+• Good balance of range and penetration
+• Less crowded than VHF
+• Antenna sizes are practical
+
+The challenge: This spectrum is shared with TV broadcasts and other users!`,
+        action: null
+      },
+      {
+        id: 2,
+        title: 'Reading the Spectrum',
+        content: `A spectrum analyzer shows RF activity in your venue.
+
+**Reading the display:**
+• X-axis: Frequency (MHz)
+• Y-axis: Signal strength (dBm)
+• Peaks: Active transmitters or interference
+• Noise floor: Background RF noise level
+
+**What to look for:**
+• 🔴 Tall peaks: Strong signals - AVOID these frequencies
+• 🟡 Medium peaks: Moderate signals - use with caution
+• 🟢 Low/flat areas: Clear spectrum - safe to use
+
+The goal is to place your wireless frequencies in the "quiet" gaps between existing signals.`,
+        action: null
+      },
+      {
+        id: 3,
+        title: 'Understanding Intermodulation',
+        content: `When multiple transmitters operate together, they create "ghost" frequencies called intermodulation (IM) products.
+
+**How it happens:**
+Two frequencies (F1 and F2) combine to create new frequencies:
+• 2×F1 - F2 = IM product
+• 2×F2 - F1 = IM product
+• And many more combinations...
+
+**Example:**
+• Freq 1: 600.000 MHz
+• Freq 2: 600.500 MHz
+• IM Products: 599.500 MHz, 601.000 MHz, etc.
+
+If an IM product lands on another receiver's frequency, you'll hear interference!
+
+**The math gets exponential:** 4 transmitters = 24+ IM products. 8 transmitters = hundreds!`,
+        action: null
+      },
+      {
+        id: 4,
+        title: 'Frequency Coordination Tools',
+        content: `Never guess frequencies - use coordination software!
+
+**Popular tools:**
+• **Shure Wireless Workbench**: Free, excellent for Shure gear
+• **Sennheiser WSM**: For Sennheiser systems
+• **IAS Intermodulation Analysis**: Universal tool
+• **RF Venue Vantage**: Cloud-based coordination
+
+**What these tools do:**
+• Calculate all intermodulation products
+• Check against local TV channels
+• Find compatible frequency groups
+• Export frequencies to your receivers
+
+**Best practice:** Always scan the venue, then coordinate. Never reuse a frequency plan without re-scanning!`,
+        action: null
+      },
+      {
+        id: 5,
+        title: 'TV Channel Awareness',
+        content: `TV broadcasts are powerful signals that will interfere with wireless audio.
+
+**The FCC Repack (2020):**
+• TV stations moved to channels 2-36 (54-608 MHz)
+• 600 MHz band (614-698 MHz) is now off-limits
+• Always check local TV channels before the show
+
+**How to check:**
+• FCC White Space Database
+• Shure/Sennheiser Frequency Finder apps
+• Wireless Workbench TV channel lookup
+
+**On the spectrum:** Active TV channels appear as wide, flat-topped signals spanning 6 MHz each. Never place wireless frequencies within an active TV channel!`,
+        action: null
+      },
+      {
+        id: 6,
+        title: 'Antenna Placement Basics',
+        content: `Good antenna placement is as important as frequency coordination.
+
+**Key principles:**
+• **Line of sight**: Keep antennas visible from transmitter positions
+• **Height**: Elevate antennas above crowd level (6+ feet)
+• **Spacing**: Separate diversity antennas by 1/4 wavelength minimum
+• **Distance**: Keep RX antennas away from TX antennas (IEM systems)
+
+**Avoid:**
+• Metal structures between antenna and transmitter
+• LED walls and video panels (RF noise sources)
+• Placing antennas on the floor
+• Running antenna cables next to power cables
+
+**Rule of thumb:** If you can see the stage, the antenna can "see" the transmitters.`,
+        action: null
+      },
+      {
+        id: 7,
+        title: 'Lesson Complete! 📡',
+        content: `You've mastered UHF frequency coordination!
+
+**Key takeaways:**
+• Always scan the venue before selecting frequencies
+• Intermodulation products must be calculated, not guessed
+• TV channels are off-limits - check local broadcasts
+• Antenna placement is critical for reliability
+• Use coordination software for complex deployments
+
+**Pro tip:** Save successful frequency plans for each venue. You can often reuse them on return visits - but always verify with a fresh scan!
+
+Next up: Audio over IP - Dante and network audio!`,
+        action: null
+      }
+    ]
+  },
+
+  // ============================================
+  // PRODUCTION TECH TRAINER: MODULE 8 - AUDIO NETWORKING
+  // ============================================
+  'audio-over-ip-basics': {
+    id: 'audio-over-ip-basics',
+    module: 8,
+    title: 'Audio over IP: Dante & AES67',
+    icon: '🌐',
+    difficulty: 'intermediate',
+    duration: '25 min',
+    description: 'Learn network audio routing, device discovery, channel subscriptions, and clock synchronization',
+    steps: [
+      {
+        id: 1,
+        title: 'Audio Networking Revolution',
+        content: `Audio over IP (AoIP) transmits digital audio over standard Ethernet networks.
+
+**Why AoIP?**
+• **Reduced cabling**: One Cat6 cable replaces dozens of analog snakes
+• **Flexibility**: Route any input to any output instantly
+• **Scalability**: Add channels by adding devices, not cables
+• **Integration**: Audio, video, and control on one network
+
+**Popular AoIP protocols:**
+• **Dante**: Industry standard, easy to use
+• **AES67**: Open standard for interoperability
+• **AVB**: IEEE standard with guaranteed bandwidth
+• **Ravenna**: AES67-compatible, used in broadcast
+
+Think of it like email for audio - any device can send to any other device on the network.`,
+        action: null
+      },
+      {
+        id: 2,
+        title: 'How Dante Works',
+        content: `Dante uses standard IP networking to transport audio.
+
+**Key concepts:**
+• **Transmit (TX)**: Device sends audio channels to the network
+• **Receive (RX)**: Device subscribes to channels from other devices
+• **Multicast**: One-to-many audio distribution
+• **Unicast**: Point-to-point audio for efficiency
+
+**Network requirements:**
+• Gigabit Ethernet (1Gbps minimum)
+• Managed switches recommended
+• QoS (Quality of Service) configured
+• Separate VLAN for audio (best practice)
+
+**Latency options:**
+• 0.25ms - Low latency (local, single switch)
+• 0.5ms - Default (recommended)
+• 1.0ms - Networks with multiple switches
+• 5.0ms - Very large networks`,
+        action: null
+      },
+      {
+        id: 3,
+        title: 'Dante Controller',
+        content: `Dante Controller is the free software for managing Dante networks.
+
+**Device discovery:**
+When devices connect, they automatically appear in Dante Controller.
+
+**The matrix view:**
+• Rows = Receive channels (destinations)
+• Columns = Transmit channels (sources)
+• Click intersections to create subscriptions
+
+**Subscription states:**
+• ✓ (Green): Audio flowing
+• ⏳ (Yellow): Subscription pending
+• ✕ (Red): Subscription failed
+
+**Device info shown:**
+• Device names (customizable)
+• Channel counts (TX and RX)
+• Sample rate and latency settings
+• Network status and clock info`,
+        action: null
+      },
+      {
+        id: 4,
+        title: 'Clock Synchronization',
+        content: `All Dante devices must share a common clock to stay synchronized.
+
+**Why clocking matters:**
+Digital audio is sampled at precise intervals (e.g., 48,000 times per second). If devices disagree on timing, you get clicks, pops, and distortion.
+
+**Dante clocking:**
+• One device is the **Clock Master**
+• All other devices sync to the master
+• Automatic failover if master disconnects
+
+**Clock Master selection:**
+• Dante auto-selects the best clock
+• You can force a preferred master
+• External word clock input has highest priority
+
+**Look for:**
+• 👑 Crown icon: Clock Master
+• 🔗 Link icon: Synced to master
+• ⚠️ Warning: Clock issues detected`,
+        action: null
+      },
+      {
+        id: 5,
+        title: 'Sample Rates and Latency',
+        content: `All devices on a Dante network must use the same sample rate.
+
+**Common sample rates:**
+• **44.1 kHz**: CD quality, music playback
+• **48 kHz**: Standard for live sound and broadcast
+• **96 kHz**: High-resolution recording
+
+**Choosing latency:**
+Lower latency = more CPU and network load
+
+| Setting | Use Case |
+|---------|----------|
+| 0.25ms | Single switch, local connections |
+| 0.5ms | 1-2 switches, recommended default |
+| 1.0ms | 3+ switches, longer cable runs |
+| 5.0ms | Very large networks, WiFi bridges |
+
+**Pro tip:** Use the highest latency your application allows. This provides more stability and less network strain.`,
+        action: null
+      },
+      {
+        id: 6,
+        title: 'Redundant Networking',
+        content: `Professional Dante systems use dual network paths for reliability.
+
+**Primary and Secondary networks:**
+• Devices have two Ethernet ports
+• Primary carries audio normally
+• Secondary takes over if primary fails
+• Switchover is automatic and seamless
+
+**Redundancy modes:**
+• **Redundant**: Identical audio on both networks
+• **Switched**: Secondary activates only on failure
+
+**Implementation:**
+• Use two separate switches
+• Keep cable paths physically separate
+• Test failover regularly during setup
+
+**Critical events** (concerts, broadcasts) should always use redundant networking!`,
+        action: null
+      },
+      {
+        id: 7,
+        title: 'Lesson Complete! 🌐',
+        content: `You've learned the fundamentals of Audio over IP!
+
+**Key takeaways:**
+• Dante simplifies routing with network-based subscriptions
+• All devices must share a common clock source
+• Redundant networks provide reliability for critical applications
+• Sample rate and latency must be configured consistently
+• Dante Controller is your central management tool
+
+**Troubleshooting quick reference:**
+• No devices appearing? Check switch and VLAN config
+• Audio clicking/popping? Check clock synchronization
+• Subscription failed? Verify sample rates match
+• High latency? Reduce network hops or increase latency setting
+
+Next up: DMX Lighting fundamentals!`,
+        action: null
+      }
+    ]
+  },
+
+  // ============================================
+  // PRODUCTION TECH TRAINER: MODULE 9 - LIGHTING CONTROL
+  // ============================================
+  'dmx-lighting-fundamentals': {
+    id: 'dmx-lighting-fundamentals',
+    module: 9,
+    title: 'DMX Lighting & Addressing',
+    icon: '💡',
+    difficulty: 'beginner',
+    duration: '20 min',
+    description: 'Learn DMX512 protocol, fixture addressing, universes, and basic lighting control',
+    steps: [
+      {
+        id: 1,
+        title: 'Introduction to DMX',
+        content: `DMX512 is the standard protocol for controlling stage lighting.
+
+**DMX stands for:**
+• **D**igital
+• **M**ultiplex
+• **512** channels per universe
+
+**How it works:**
+• A lighting console sends data to all fixtures on the line
+• Each fixture listens for its assigned address
+• Data is 8-bit: values from 0-255
+• Refreshes up to 44 times per second
+
+Think of DMX like a radio broadcast - one transmitter, many receivers, each tuned to their own "station" (address).`,
+        action: null
+      },
+      {
+        id: 2,
+        title: 'Channels and Addresses',
+        content: `Each DMX universe has 512 channels, numbered 1-512.
+
+**Key concepts:**
+• **Channel**: A single 8-bit value (0-255)
+• **Address**: The starting channel for a fixture
+• **Footprint**: How many channels a fixture uses
+
+**Common fixture footprints:**
+• Dimmer: 1 channel (intensity only)
+• RGB LED: 3 channels (red, green, blue)
+• RGBW LED: 4-5 channels (+ white, + master dimmer)
+• Moving Head: 16-40+ channels
+
+**Example:**
+An RGB LED fixture at address 1 uses channels 1, 2, 3.
+The next fixture must start at address 4 or higher.`,
+        action: null
+      },
+      {
+        id: 3,
+        title: 'DMX Wiring',
+        content: `DMX uses a daisy-chain topology.
+
+**Connection order:**
+Console → Splitter (input) → Splitter (outputs) → Fixtures → Fixtures...
+
+**Important rules:**
+• Use 5-pin XLR cables (not audio cables!)
+• Maximum 32 fixtures per line without splitter
+• Maximum cable length: 300m (1000ft) total
+• Always use a DMX terminator on the last fixture
+
+**Why terminators?**
+Without termination, the signal can reflect back up the cable and cause flickering or erratic behavior.
+
+**DMX cables vs Audio cables:**
+Both use XLR, but DMX cables have different impedance (110Ω). Audio cables *might* work for short runs but cause problems on longer lines.`,
+        action: null
+      },
+      {
+        id: 4,
+        title: 'Address Planning',
+        content: `Planning addresses before patching saves time and headaches.
+
+**Example address plan for a small rig:**
+
+| Fixture | Channels | Start | End |
+|---------|----------|-------|-----|
+| LED Par 1 | 5 | 001 | 005 |
+| LED Par 2 | 5 | 006 | 010 |
+| LED Par 3 | 5 | 011 | 015 |
+| LED Par 4 | 5 | 016 | 020 |
+| Mover 1 | 16 | 101 | 116 |
+| Mover 2 | 16 | 117 | 132 |
+
+**Pro tip:** Leave gaps between fixture types (like jumping to 101 for movers). This allows for expansion without re-addressing the whole rig.`,
+        action: null
+      },
+      {
+        id: 5,
+        title: 'Fixture Modes',
+        content: `Most fixtures have multiple DMX modes (personalities).
+
+**Example - Moving Head modes:**
+• **16-channel mode**: Basic control
+• **24-channel mode**: Adds fine movement (16-bit pan/tilt)
+• **40-channel mode**: Full feature access
+
+**Why multiple modes?**
+• Simpler modes save DMX channels
+• Extended modes offer more precision
+• Match mode to your console's fixture library
+
+**Channel layout example (16ch Moving Head):**
+| CH | Function |
+|----|----------|
+| 1 | Pan (coarse) |
+| 2 | Pan (fine) |
+| 3 | Tilt (coarse) |
+| 4 | Tilt (fine) |
+| 5 | Movement speed |
+| 6 | Dimmer |
+| 7 | Shutter/strobe |
+| 8 | Color wheel |
+
+**Important:** Console fixture library MUST match the actual fixture mode!`,
+        action: null
+      },
+      {
+        id: 6,
+        title: 'Avoiding Address Conflicts',
+        content: `Address conflicts cause unpredictable behavior.
+
+**What is a conflict?**
+Two fixtures using the same DMX channel(s).
+
+**Conflict example:**
+• Fixture A at address 1 (5 channels: 1-5)
+• Fixture B at address 3 (5 channels: 3-7)
+• Channels 3, 4, 5 overlap - CONFLICT!
+
+**Symptoms of conflicts:**
+• Fixtures moving/changing unexpectedly
+• Colors not matching
+• Some channels not responding
+
+**Prevention:**
+• Plan addresses before patching
+• Use address calculator tools
+• Double-check fixture footprints
+• Leave gaps between fixture groups`,
+        action: null
+      },
+      {
+        id: 7,
+        title: 'Multiple Universes',
+        content: `When you need more than 512 channels, add more universes.
+
+**Universe numbering:**
+• Universe 1: Channels 1-512
+• Universe 2: Channels 1-512 (separate output)
+• Universe 3, 4, 5... and so on
+
+**Addressing notation:**
+• "1.001" = Universe 1, Channel 1
+• "2.256" = Universe 2, Channel 256
+
+**Physical setup:**
+Each universe needs its own DMX output from the console (or a network node).
+
+**Typical organization:**
+• Universe 1: Front wash fixtures
+• Universe 2: Moving heads
+• Universe 3: LED walls/pixels
+• Universe 4: House lights`,
+        action: null
+      },
+      {
+        id: 8,
+        title: 'Lesson Complete! 💡',
+        content: `You've mastered DMX lighting fundamentals!
+
+**Key takeaways:**
+• DMX512 uses 512 channels per universe
+• Each fixture needs a unique start address
+• Footprint = number of channels a fixture uses
+• Never overlap addresses between fixtures
+• Use splitters for long cable runs
+• Use network nodes (sACN/Art-Net) for large rigs
+
+**Troubleshooting quick reference:**
+• Flickering: Check cables, add terminator
+• No response: Verify address and mode match console
+• Wrong colors: Check RGB channel order in fixture profile
+• Partial response: Look for address conflicts
+
+Next up: Complete system signal flow and patching!`,
+        action: null
+      }
+    ]
+  },
+
+  // ============================================
+  // PRODUCTION TECH TRAINER: MODULE 10 - SYSTEM INTEGRATION
+  // ============================================
+  'stage-signal-flow': {
+    id: 'stage-signal-flow',
+    module: 10,
+    title: 'Stage Signal Flow & Patching',
+    icon: '🔀',
+    difficulty: 'intermediate',
+    duration: '25 min',
+    description: 'Master the complete signal path from stage to speakers, including splits and system design',
+    steps: [
+      {
+        id: 1,
+        title: 'Understanding Complete Signal Flow',
+        content: `A live production signal chain has many stages between source and audience.
+
+**Complete audio signal path:**
+
+**STAGE**
+Microphones/DIs → Stage Box → Analog/Digital Split
+
+**TRANSPORT**
+→ FOH Snake / Dante Network →
+
+**FRONT OF HOUSE**
+→ FOH Mixer → System Processor → Amplifiers → Main PA
+
+**MONITORS**
+→ Monitor Mixer → Amps → Wedges / IEM Transmitters
+
+**RECORDING**
+→ Recording Interface → Multitrack System
+
+Each path must be planned, connected, and verified. Missing one connection breaks the chain!`,
+        action: null
+      },
+      {
+        id: 2,
+        title: 'Input Sources',
+        content: `Every signal chain starts with input sources.
+
+**Microphone types:**
+• **Dynamic**: Rugged, no phantom power (SM58, SM57)
+• **Condenser**: Sensitive, requires 48V phantom power
+• **Ribbon**: Delicate, NEVER apply phantom power!
+
+**Direct inputs:**
+• **DI Box**: Converts high-Z instrument to low-Z balanced
+• **Active DI**: Requires power, handles hot signals better
+• **Passive DI**: No power, natural sound
+
+**Line-level sources:**
+• Keyboards, playback devices, click tracks
+• Already at line level, may need isolation/balancing
+
+**Pro tip:** Label everything! A well-labeled input list saves hours during setup.`,
+        action: null
+      },
+      {
+        id: 3,
+        title: 'The Stage Box',
+        content: `Stage boxes consolidate all inputs into one location.
+
+**Stage box functions:**
+• Consolidate many inputs into one multi-pair cable
+• Provide phantom power distribution
+• Often include splitter transformers
+• May have local headphone monitoring
+
+**Analog vs Digital:**
+• **Analog stage box**: Sends analog audio via copper snake
+• **Digital stage box**: Converts to Dante/AES50/MADI at stage
+
+**Typical configurations:**
+• 16x4: 16 inputs, 4 returns
+• 32x8: 32 inputs, 8 returns
+• 48x16: 48 inputs, 16 returns
+
+**Digital advantages:** One Cat6 cable instead of heavy copper snake, longer distances, multiple destinations.`,
+        action: null
+      },
+      {
+        id: 4,
+        title: 'The Audio Split',
+        content: `Audio splits send one input to multiple destinations.
+
+**Why split?**
+• FOH and monitors need the same inputs
+• Broadcast/recording needs isolated feeds
+• Multiple mix positions (delay towers, etc.)
+
+**Split types:**
+• **Y-split**: Simple cable split (shares phantom power - risky!)
+• **Passive split**: Transformer isolated, no phantom sharing
+• **Active split**: Powered, can add gain, best isolation
+
+**Split configurations:**
+• 2-way: FOH + Monitors
+• 3-way: FOH + Monitors + Broadcast
+• 4-way: Add recording or delay tower
+
+**Critical:** Always coordinate phantom power between splits! Only ONE destination should provide phantom to avoid damage.`,
+        action: null
+      },
+      {
+        id: 5,
+        title: 'FOH Signal Path',
+        content: `The FOH (Front of House) path delivers audio to the main PA system.
+
+**FOH signal chain:**
+Split output → Snake/Network → FOH Mixer → System Processor → Amplifiers → Main PA
+
+**System Processor functions:**
+• **Crossover**: Splits highs, mids, lows to appropriate speakers
+• **Limiting**: Protects speakers from damage
+• **EQ**: Room correction for venue acoustics
+• **Delay**: Time alignment for speaker arrays
+
+**Main PA components:**
+• Line arrays or point source speakers
+• Subwoofers (usually separate amp channels)
+• Front fills for near-audience coverage
+• Delay speakers for large venues`,
+        action: null
+      },
+      {
+        id: 6,
+        title: 'Monitor World',
+        content: `Monitor world provides audio back to performers on stage.
+
+**Monitor options:**
+
+**Wedge monitors:**
+• Floor monitors facing performers
+• Each mix is a separate output
+• Typically 6-12 separate mixes needed
+
+**In-ear monitors (IEMs):**
+• Personal mix via wireless earpieces
+• Stereo capability for spatial positioning
+• Better hearing protection
+• Requires wireless transmitters per person
+
+**Side fills:**
+• Large speakers at stage edges
+• Supplements wedges/IEMs with "feel"
+• Usually a simpler mix (more drums/bass)
+
+**Monitor signal path:**
+Split → Monitor Mixer → Graphic EQ → Amp → Wedge
+(or)
+Split → Monitor Mixer → IEM Transmitter → Performer`,
+        action: null
+      },
+      {
+        id: 7,
+        title: 'Recording & Broadcast',
+        content: `Recording and broadcast require clean, isolated feeds.
+
+**Recording options:**
+
+**Multitrack recording:**
+• Every channel recorded separately
+• Maximum flexibility in post-production
+• Requires high channel-count interface (32+ channels)
+
+**Stereo/Stem recording:**
+• Mix or submixes recorded
+• Smaller file sizes
+• Less post flexibility
+
+**Broadcast feeds:**
+
+**Program feed:**
+• Mixed output ready for broadcast
+• Properly limited and compressed
+
+**Clean feed:**
+• Without announcer/commentary
+• For international broadcasts
+
+**ISO feeds:**
+• Individual inputs for broadcast mixing
+• Similar to multitrack
+
+**Key:** Recording/broadcast should always come from an ISOLATED split leg to avoid ground loops and interference.`,
+        action: null
+      },
+      {
+        id: 8,
+        title: 'Patch Bays and Tie Lines',
+        content: `Patch bays allow quick reconfiguration of signal routing.
+
+**Patch bay configurations:**
+• **Full-normal**: Top and bottom connected by default
+• **Half-normal**: Connection broken only when patching bottom
+• **Non-normal**: No default connection, must patch everything
+
+**Common uses:**
+• Insert points for outboard gear
+• Alternative routing options
+• Quick troubleshooting access
+• Tie lines between locations
+
+**Tie lines:**
+Permanent cables between venues, rooms, or positions.
+
+**Example:**
+Main room has 8 tie lines to green room. Patch bay lets you assign any channels to those lines instantly without re-cabling.`,
+        action: null
+      },
+      {
+        id: 9,
+        title: 'Lesson Complete! 🔀',
+        content: `Outstanding! You've mastered stage signal flow and patching!
+
+**Key takeaways:**
+• Signal flows from source → stage box → split → destinations
+• Splits allow one input to feed multiple systems
+• FOH, monitors, and recording have separate paths
+• Patch bays provide flexible routing
+• Every connection must be verified before showtime
+
+**Troubleshooting guide:**
+• No signal at FOH? Check split and snake routing
+• Feedback in monitors? Verify correct mix assignment
+• Hum/buzz? Check ground lifts and cable shielding
+• One channel missing? Trace from source to destination
+
+**Pro tip:** Always do a complete line check before the show, verifying every input at every destination.
+
+Congratulations - you've completed the Production Tech Training curriculum!`,
+        action: null
+      }
+    ]
   }
 }
 

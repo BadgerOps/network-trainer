@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 
 // Module organization matching the curriculum
-const MODULES = [
+const NETWORK_MODULES = [
   {
     id: 1,
     name: 'Foundations',
@@ -49,11 +49,46 @@ const MODULES = [
   }
 ]
 
+// Production Tech modules (lights & sounds)
+const PRODUCTION_MODULES = [
+  {
+    id: 6,
+    name: 'Audio Fundamentals',
+    level: 'Beginner',
+    lessons: ['audio-mixing-fundamentals']
+  },
+  {
+    id: 7,
+    name: 'Wireless Systems',
+    level: 'Intermediate',
+    lessons: ['uhf-frequency-coordination']
+  },
+  {
+    id: 8,
+    name: 'Audio Networking',
+    level: 'Intermediate',
+    lessons: ['audio-over-ip-basics']
+  },
+  {
+    id: 9,
+    name: 'Lighting Control',
+    level: 'Beginner',
+    lessons: ['dmx-lighting-fundamentals']
+  },
+  {
+    id: 10,
+    name: 'System Integration',
+    level: 'Intermediate',
+    lessons: ['stage-signal-flow']
+  }
+]
+
 export default function LessonMenu({ onClose }) {
   const { startLesson, startChallenge, completedLessons, completedChallenges } = useLessonStore()
   const clearNetwork = useNetworkStore((state) => state.clearNetwork)
   const theme = useThemeStore((state) => state.getTheme())
   const [activeTab, setActiveTab] = React.useState('lessons')
+  const [activeCurriculum, setActiveCurriculum] = React.useState('network') // 'network' or 'production'
 
   const borderRadius = theme.effects.borderRadius
 
@@ -65,6 +100,9 @@ export default function LessonMenu({ onClose }) {
     theme.colors.accentQuaternary,
     theme.colors.success
   ]
+
+  // Get active modules based on selected curriculum
+  const MODULES = activeCurriculum === 'network' ? NETWORK_MODULES : PRODUCTION_MODULES
 
   const handleStartLesson = (lessonId) => {
     clearNetwork()
@@ -113,14 +151,18 @@ export default function LessonMenu({ onClose }) {
         >
           <div className="flex items-center gap-3">
             <div
-              className="w-12 h-12 flex items-center justify-center"
+              className="w-12 h-12 flex items-center justify-center text-2xl"
               style={{
-                background: `linear-gradient(135deg, ${theme.colors.accentQuaternary} 0%, ${theme.colors.accentTertiary} 100%)`,
+                background: activeCurriculum === 'network'
+                  ? `linear-gradient(135deg, ${theme.colors.accentQuaternary} 0%, ${theme.colors.accentTertiary} 100%)`
+                  : `linear-gradient(135deg, ${theme.colors.warning} 0%, ${theme.colors.accent} 100%)`,
                 borderRadius: `calc(${borderRadius} + 4px)`,
-                boxShadow: theme.effects.hasGlow ? `0 0 20px ${theme.colors.accentQuaternary}66` : 'none'
+                boxShadow: theme.effects.hasGlow
+                  ? `0 0 20px ${activeCurriculum === 'network' ? theme.colors.accentQuaternary : theme.colors.warning}66`
+                  : 'none'
               }}
             >
-              <Zap size={24} style={{ color: '#fff' }} />
+              {activeCurriculum === 'network' ? <Zap size={24} style={{ color: '#fff' }} /> : '🎚️'}
             </div>
             <div>
               <h2
@@ -131,7 +173,7 @@ export default function LessonMenu({ onClose }) {
                   textShadow: theme.effects.hasGlow ? `0 0 10px ${theme.colors.accentTertiary}80` : 'none'
                 }}
               >
-                NETRUNNER ACADEMY
+                {activeCurriculum === 'network' ? 'NETRUNNER ACADEMY' : 'PRODUCTION TECH TRAINER'}
               </h2>
               <p
                 className="text-sm"
@@ -140,7 +182,9 @@ export default function LessonMenu({ onClose }) {
                   color: theme.colors.textMuted
                 }}
               >
-                Choose your training protocol
+                {activeCurriculum === 'network'
+                  ? 'Master networking fundamentals'
+                  : 'Learn live event production'}
               </p>
             </div>
           </div>
@@ -157,8 +201,48 @@ export default function LessonMenu({ onClose }) {
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Curriculum Toggle */}
         <div className="flex gap-2 px-5 pt-4">
+          <button
+            onClick={() => setActiveCurriculum('network')}
+            className="flex items-center gap-2 px-4 py-2 text-sm uppercase tracking-wide transition-all"
+            style={{
+              fontFamily: theme.fonts.heading,
+              background: activeCurriculum === 'network'
+                ? `linear-gradient(135deg, ${theme.colors.info} 0%, ${theme.colors.accentSecondary} 100%)`
+                : `${theme.colors.info}15`,
+              border: activeCurriculum === 'network' ? 'none' : `1px solid ${theme.colors.borderLight}`,
+              color: activeCurriculum === 'network' ? '#fff' : theme.colors.textMuted,
+              borderRadius,
+              boxShadow: activeCurriculum === 'network' && theme.effects.hasGlow
+                ? `0 0 15px ${theme.colors.info}66`
+                : 'none'
+            }}
+          >
+            🌐 Network Training
+          </button>
+          <button
+            onClick={() => setActiveCurriculum('production')}
+            className="flex items-center gap-2 px-4 py-2 text-sm uppercase tracking-wide transition-all"
+            style={{
+              fontFamily: theme.fonts.heading,
+              background: activeCurriculum === 'production'
+                ? `linear-gradient(135deg, ${theme.colors.warning} 0%, ${theme.colors.accent} 100%)`
+                : `${theme.colors.warning}15`,
+              border: activeCurriculum === 'production' ? 'none' : `1px solid ${theme.colors.borderLight}`,
+              color: activeCurriculum === 'production' ? '#fff' : theme.colors.textMuted,
+              borderRadius,
+              boxShadow: activeCurriculum === 'production' && theme.effects.hasGlow
+                ? `0 0 15px ${theme.colors.warning}66`
+                : 'none'
+            }}
+          >
+            🎚️ Production Tech
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 px-5 pt-3">
           <button
             onClick={() => setActiveTab('lessons')}
             className="flex items-center gap-2 px-4 py-2 text-sm uppercase tracking-wide transition-all"
