@@ -1,13 +1,16 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
-import { Stage, Layer, Group } from 'react-konva'
+import { Stage, Layer } from 'react-konva'
 import { useNetworkStore } from '../../store/networkStore'
 import { useSimulationStore } from '../../store/simulationStore'
 import DeviceNode from './DeviceNode'
 import ConnectionLine from './ConnectionLine'
 import PacketAnimation from './PacketAnimation'
+import { useConnectionController } from './useConnectionController.jsx'
+import { DEVICE_NODE_SIZE, getPortCanvasPosition } from '../../utils/portLayout'
 
 export default function NetworkCanvas() {
   const containerRef = useRef(null)
+  const stageRef = useRef(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
   const [isDraggingOver, setIsDraggingOver] = useState(false)
 
@@ -18,8 +21,6 @@ export default function NetworkCanvas() {
   const moveDevice = useNetworkStore((state) => state.moveDevice)
   const selectDevice = useNetworkStore((state) => state.selectDevice)
   const deselectAll = useNetworkStore((state) => state.deselectAll)
-  const connectionMode = useNetworkStore((state) => state.connectionMode)
-  const pendingConnection = useNetworkStore((state) => state.pendingConnection)
 
   const packets = useSimulationStore((state) => state.packets)
   const isRunning = useSimulationStore((state) => state.isRunning)
@@ -74,34 +75,40 @@ export default function NetworkCanvas() {
     }
   }
 
-  // Get device position by ID
-  const getDevicePosition = useCallback(
-    (deviceId) => {
-      const device = devices.find((d) => d.id === deviceId)
-      return device ? device.position : null
+  // Calculate connection line points
+  const getConnectionPoints = useCallback(
+    (connection) => {
+      const sourceDevice = devices.find((d) => d.id === connection.source.deviceId)
+      const targetDevice = devices.find((d) => d.id === connection.target.deviceId)
+      if (!sourceDevice || !targetDevice) return null
+
+      const sourcePos = getPortCanvasPosition(
+        sourceDevice,
+        connection.source.portId,
+        DEVICE_NODE_SIZE
+      )
+      const targetPos = getPortCanvasPosition(
+        targetDevice,
+        connection.target.portId,
+        DEVICE_NODE_SIZE
+      )
+
+      if (!sourcePos || !targetPos) return null
+
+      return {
+        x1: sourcePos.x,
+        y1: sourcePos.y,
+        x2: targetPos.x,
+        y2: targetPos.y
+      }
     },
     [devices]
   )
 
-  // Calculate connection line points
-  const getConnectionPoints = useCallback(
-    (connection) => {
-      const sourcePos = getDevicePosition(connection.source.deviceId)
-      const targetPos = getDevicePosition(connection.target.deviceId)
-
-      if (!sourcePos || !targetPos) return null
-
-      // Offset to center of device
-      const offset = 40
-      return {
-        x1: sourcePos.x + offset,
-        y1: sourcePos.y + offset,
-        x2: targetPos.x + offset,
-        y2: targetPos.y + offset
-      }
-    },
-    [getDevicePosition]
-  )
+  const connectionController = useConnectionController({
+    stageRef,
+    devices
+  })
 
   return (
     <div
@@ -155,7 +162,11 @@ export default function NetworkCanvas() {
       <Stage
         width={dimensions.width}
         height={dimensions.height}
+        ref={stageRef}
         onClick={handleStageClick}
+        onMouseDown={connectionController.onStageMouseDown}
+        onMouseMove={connectionController.onStageMouseMove}
+        onMouseUp={connectionController.onStageMouseUp}
       >
         {/* Connection Layer (below devices) */}
         <Layer>
@@ -173,13 +184,7 @@ export default function NetworkCanvas() {
             )
           })}
 
-          {/* Pending connection line */}
-          {connectionMode && pendingConnection && (
-            <PendingConnectionLine
-              sourceDeviceId={pendingConnection.sourceDevice}
-              devices={devices}
-            />
-          )}
+          {connectionController.preview}
         </Layer>
 
         {/* Device Layer */}
@@ -191,7 +196,8 @@ export default function NetworkCanvas() {
               isSelected={selectedDevice?.id === device.id}
               onSelect={() => selectDevice(device)}
               onMove={(x, y) => moveDevice(device.id, x, y)}
-              connectionMode={connectionMode}
+              connectionDrag={connectionController.dragState}
+              onPortDragStart={connectionController.startConnectionDrag}
             />
           ))}
         </Layer>
@@ -212,47 +218,3 @@ export default function NetworkCanvas() {
     </div>
   )
 }
-
-// Pending connection line that follows mouse
-function PendingConnectionLine({ sourceDeviceId, devices }) {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const sourceDevice = devices.find((d) => d.id === sourceDeviceId)
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const stage = document.querySelector('.konvajs-content')
-      if (!stage) return
-      const rect = stage.getBoundingClientRect()
-      setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      })
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
-
-  if (!sourceDevice) return null
-
-  const offset = 40
-  return (
-    <Group>
-      <Line
-        points={[
-          sourceDevice.position.x + offset,
-          sourceDevice.position.y + offset,
-          mousePos.x,
-          mousePos.y
-        ]}
-        stroke="#6366f1"
-        strokeWidth={3}
-        dash={[10, 5]}
-        opacity={0.7}
-      />
-    </Group>
-  )
-}
-
-// Need to import Line for the pending connection
-import { Line } from 'react-konva'

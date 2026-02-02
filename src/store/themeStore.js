@@ -90,9 +90,9 @@ export const THEMES = {
     description: 'Minimal, professional, light mode',
     preview: {
       bg: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      accent1: '#3b82f6',
-      accent2: '#10b981',
-      accent3: '#6366f1'
+      accent1: '#0b5bd3',
+      accent2: '#1fbf9a',
+      accent3: '#f97316'
     },
     colors: {
       // Backgrounds
@@ -104,44 +104,44 @@ export const THEMES = {
       bgSelected: 'rgba(59, 130, 246, 0.12)',
 
       // Accents
-      accent: '#3b82f6',
-      accentSecondary: '#10b981',
-      accentTertiary: '#6366f1',
-      accentQuaternary: '#8b5cf6',
+      accent: '#0b5bd3',
+      accentSecondary: '#1fbf9a',
+      accentTertiary: '#f97316',
+      accentQuaternary: '#0ea5e9',
 
       // Status
       success: '#10b981',
       warning: '#f59e0b',
       error: '#ef4444',
-      info: '#3b82f6',
+      info: '#0b5bd3',
 
       // Text
       textPrimary: '#1e293b',
       textSecondary: '#475569',
       textMuted: '#94a3b8',
-      textAccent: '#3b82f6',
+      textAccent: '#0b5bd3',
 
       // Borders
       border: '#e2e8f0',
       borderLight: '#f1f5f9',
-      borderAccent: '#3b82f6',
+      borderAccent: '#0b5bd3',
 
       // Device colors
-      router: '#3b82f6',
-      switch: '#10b981',
-      l3switch: '#6366f1',
-      computer: '#64748b',
-      server: '#f59e0b',
-      cloud: '#8b5cf6',
+      router: '#0b5bd3',
+      switch: '#1fbf9a',
+      l3switch: '#0ea5e9',
+      computer: '#334155',
+      server: '#f97316',
+      cloud: '#38bdf8',
 
       // Shadows
       glow: 'rgba(59, 130, 246, 0.15)',
       shadow: 'rgba(0, 0, 0, 0.08)'
     },
     fonts: {
-      heading: "'Inter', system-ui, sans-serif",
-      body: "'Inter', system-ui, sans-serif",
-      mono: "'JetBrains Mono', 'Fira Code', monospace"
+      heading: "'Space Grotesk', sans-serif",
+      body: "'IBM Plex Sans', sans-serif",
+      mono: "'IBM Plex Mono', monospace"
     },
     effects: {
       borderRadius: '8px',
@@ -285,9 +285,9 @@ export const THEMES = {
       shadow: 'rgba(0, 0, 0, 0.4)'
     },
     fonts: {
-      heading: "'Courier New', monospace",
-      body: "'Segoe UI', Arial, sans-serif",
-      mono: "'Courier New', monospace"
+      heading: "'IBM Plex Mono', monospace",
+      body: "'Space Grotesk', sans-serif",
+      mono: "'IBM Plex Mono', monospace"
     },
     effects: {
       borderRadius: '0px',

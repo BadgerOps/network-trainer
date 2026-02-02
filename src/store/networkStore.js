@@ -68,6 +68,15 @@ export const DEVICE_TYPES = {
 let deviceCounter = 0
 const generateId = (type) => `${type}-${++deviceCounter}`
 
+const getDefaultPortDirection = () => 'inout'
+
+const isPortConnected = (connections, deviceId, portId) =>
+  connections.some(
+    (c) =>
+      (c.source.deviceId === deviceId && c.source.portId === portId) ||
+      (c.target.deviceId === deviceId && c.target.portId === portId)
+  )
+
 // Helper to create a new device
 export const createDevice = (type, x, y) => {
   const config = DEVICE_TYPES[type]
@@ -78,6 +87,7 @@ export const createDevice = (type, x, y) => {
 
   // Create default interfaces
   for (let i = 0; i < config.defaultPorts; i++) {
+      const direction = getDefaultPortDirection()
     interfaces.push({
       id: `${id}-port${i}`,
       name: type === 'router' ? `Gi0/${i}` : type.includes('switch') ? `Fa0/${i}` : `eth${i}`,
@@ -87,7 +97,10 @@ export const createDevice = (type, x, y) => {
       vlan: 1,
       mode: 'access', // access or trunk
       status: 'down',
-      connectedTo: null,
+      direction,
+      portType: 'ethernet',
+      maxConnections: 1,
+      connectedTo: [],
       macAddress: generateMacAddress()
     })
   }
@@ -215,80 +228,14 @@ export const useNetworkStore = create((set, get) => ({
 
     if (!pendingConnection) return
 
-    // Don't connect to self
-    if (pendingConnection.sourceDevice === targetDeviceId) {
-      set({ connectionMode: null, pendingConnection: null })
-      return
-    }
-
-    // Check if either port is already connected
-    const portAlreadyConnected = state.connections.some(
-      (c) =>
-        (c.source.deviceId === pendingConnection.sourceDevice &&
-          c.source.portId === pendingConnection.sourcePort) ||
-        (c.target.deviceId === pendingConnection.sourceDevice &&
-          c.target.portId === pendingConnection.sourcePort) ||
-        (c.source.deviceId === targetDeviceId &&
-          c.source.portId === targetPortId) ||
-        (c.target.deviceId === targetDeviceId &&
-          c.target.portId === targetPortId)
-    )
-
-    if (portAlreadyConnected) {
-      set({ connectionMode: null, pendingConnection: null })
-      return
-    }
-
-    const newConnection = {
-      id: `conn-${Date.now()}`,
-      source: {
-        deviceId: pendingConnection.sourceDevice,
-        portId: pendingConnection.sourcePort
-      },
-      target: {
-        deviceId: targetDeviceId,
-        portId: targetPortId
-      },
-      status: 'up',
-      speed: '1Gbps'
-    }
-
-    // Update interface statuses
-    const updateInterfaceStatus = (devices, deviceId, portId, connectedTo) => {
-      return devices.map((d) => {
-        if (d.id !== deviceId) return d
-        return {
-          ...d,
-          interfaces: d.interfaces.map((iface) =>
-            iface.id === portId
-              ? { ...iface, status: 'up', connectedTo }
-              : iface
-          )
-        }
-      })
-    }
-
-    set((state) => {
-      let devices = updateInterfaceStatus(
-        state.devices,
-        pendingConnection.sourceDevice,
-        pendingConnection.sourcePort,
-        `${targetDeviceId}:${targetPortId}`
-      )
-      devices = updateInterfaceStatus(
-        devices,
-        targetDeviceId,
-        targetPortId,
-        `${pendingConnection.sourceDevice}:${pendingConnection.sourcePort}`
-      )
-
-      return {
-        connections: [...state.connections, newConnection],
-        devices,
-        connectionMode: null,
-        pendingConnection: null
-      }
+    get().connectPorts({
+      sourceDeviceId: pendingConnection.sourceDevice,
+      sourcePortId: pendingConnection.sourcePort,
+      targetDeviceId,
+      targetPortId
     })
+
+    set({ connectionMode: null, pendingConnection: null })
   },
 
   removeConnection: (connectionId) => {
@@ -296,7 +243,16 @@ export const useNetworkStore = create((set, get) => ({
       const conn = state.connections.find((c) => c.id === connectionId)
       if (!conn) return state
 
-      // Update interface statuses
+      const removeFromInterface = (iface, otherEnd) => {
+        const connectedTo = Array.isArray(iface.connectedTo) ? iface.connectedTo : []
+        const next = connectedTo.filter((id) => id !== otherEnd)
+        return {
+          ...iface,
+          status: next.length > 0 ? 'up' : 'down',
+          connectedTo: next
+        }
+      }
+
       const devices = state.devices.map((d) => {
         if (d.id !== conn.source.deviceId && d.id !== conn.target.deviceId) return d
         return {
@@ -306,7 +262,11 @@ export const useNetworkStore = create((set, get) => ({
               (d.id === conn.source.deviceId && iface.id === conn.source.portId) ||
               (d.id === conn.target.deviceId && iface.id === conn.target.portId)
             ) {
-              return { ...iface, status: 'down', connectedTo: null }
+              const otherEnd =
+                d.id === conn.source.deviceId
+                  ? `${conn.target.deviceId}:${conn.target.portId}`
+                  : `${conn.source.deviceId}:${conn.source.portId}`
+              return removeFromInterface(iface, otherEnd)
             }
             return iface
           })
@@ -323,6 +283,109 @@ export const useNetworkStore = create((set, get) => ({
 
   selectConnection: (connection) => {
     set({ selectedConnection: connection, selectedDevice: null })
+  },
+
+  canStartConnection: (deviceId, portId) => {
+    const state = get()
+    const device = state.devices.find((d) => d.id === deviceId)
+    const port = device?.interfaces.find((iface) => iface.id === portId)
+    if (!port) return { ok: false, reason: 'Port not found' }
+    if (isPortConnected(state.connections, deviceId, portId)) {
+      return { ok: false, reason: 'Port already in use' }
+    }
+    return { ok: true }
+  },
+
+  canConnectPorts: ({ sourceDeviceId, sourcePortId, targetDeviceId, targetPortId }) => {
+    const state = get()
+
+    if (sourceDeviceId === targetDeviceId && sourcePortId === targetPortId) {
+      return { ok: false, reason: 'Cannot connect a port to itself' }
+    }
+
+    if (sourceDeviceId === targetDeviceId) {
+      return { ok: false, reason: 'Cannot connect a device to itself' }
+    }
+
+    const sourceDevice = state.devices.find((d) => d.id === sourceDeviceId)
+    const targetDevice = state.devices.find((d) => d.id === targetDeviceId)
+    const sourcePort = sourceDevice?.interfaces.find((iface) => iface.id === sourcePortId)
+    const targetPort = targetDevice?.interfaces.find((iface) => iface.id === targetPortId)
+
+    if (!sourcePort || !targetPort) return { ok: false, reason: 'Port not found' }
+
+    const isTargetConnected = isPortConnected(state.connections, targetDeviceId, targetPortId)
+    if (targetPort.maxConnections === 1 && isTargetConnected) {
+      return { ok: false, reason: 'Target port already in use' }
+    }
+
+    const isSourceConnected = isPortConnected(state.connections, sourceDeviceId, sourcePortId)
+    if (sourcePort.maxConnections === 1 && isSourceConnected) {
+      return { ok: false, reason: 'Source port already in use' }
+    }
+
+    const alreadyConnected = state.connections.some(
+      (c) =>
+        (c.source.deviceId === sourceDeviceId &&
+          c.source.portId === sourcePortId &&
+          c.target.deviceId === targetDeviceId &&
+          c.target.portId === targetPortId) ||
+        (c.source.deviceId === targetDeviceId &&
+          c.source.portId === targetPortId &&
+          c.target.deviceId === sourceDeviceId &&
+          c.target.portId === sourcePortId)
+    )
+    if (alreadyConnected) return { ok: false, reason: 'Ports already connected' }
+
+    return { ok: true }
+  },
+
+  connectPorts: ({ sourceDeviceId, sourcePortId, targetDeviceId, targetPortId }) => {
+    const state = get()
+    const result = state.canConnectPorts({
+      sourceDeviceId,
+      sourcePortId,
+      targetDeviceId,
+      targetPortId
+    })
+
+    if (!result.ok) return false
+
+    const newConnection = {
+      id: `conn-${Date.now()}`,
+      source: { deviceId: sourceDeviceId, portId: sourcePortId },
+      target: { deviceId: targetDeviceId, portId: targetPortId },
+      status: 'up',
+      speed: '1Gbps'
+    }
+
+    const addConnectionToInterface = (iface, otherEnd) => {
+      const connectedTo = Array.isArray(iface.connectedTo) ? iface.connectedTo : []
+      if (connectedTo.includes(otherEnd)) return iface
+      const next = [...connectedTo, otherEnd]
+      return { ...iface, status: 'up', connectedTo: next }
+    }
+
+    set((state) => ({
+      connections: [...state.connections, newConnection],
+      devices: state.devices.map((d) => {
+        if (d.id !== sourceDeviceId && d.id !== targetDeviceId) return d
+        return {
+          ...d,
+          interfaces: d.interfaces.map((iface) => {
+            if (d.id === sourceDeviceId && iface.id === sourcePortId) {
+              return addConnectionToInterface(iface, `${targetDeviceId}:${targetPortId}`)
+            }
+            if (d.id === targetDeviceId && iface.id === targetPortId) {
+              return addConnectionToInterface(iface, `${sourceDeviceId}:${sourcePortId}`)
+            }
+            return iface
+          })
+        }
+      })
+    }))
+
+    return true
   },
 
   // Routing table actions
